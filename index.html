@@ -1,0 +1,684 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>도차우어 9번 음정 체크</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Mono:wght@500&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one narrow practice column — header, mode tabs, tool panel, result summary, then the etude engraved on bass-clef staves with colored noteheads */
+:root{
+  --bg:#eef2f4; --surface:#ffffff; --ink:#18222c; --muted:#5a6773; --line:#d5dde3; --staff:#7b8792;
+  --accent:#0d6466; --accent-soft:#dcecec; --on-accent:#ffffff;
+  --ok:#23854a; --ok-soft:#e1f2e6;
+  --high:#d2531f; --high-soft:#fbe6dd;
+  --low:#2d5cb0; --low-soft:#e1e9f8;
+  --miss:#9aa3ad; --miss-soft:#eceff2;
+  --f-display:"Gowun Batang","Nanum Myeongjo",Georgia,serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161b; --surface:#192028; --ink:#e6ebf0; --muted:#9aa6b2; --line:#2b343e; --staff:#6c7782;
+  --accent:#55b6b0; --accent-soft:#1d3434; --on-accent:#0b1c1c;
+  --ok:#52c27f; --ok-soft:#1b3326; --high:#f0805a; --high-soft:#3d241b;
+  --low:#79a3f2; --low-soft:#1e2a42; --miss:#6f7a85; --miss-soft:#232b33; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161b; --surface:#192028; --ink:#e6ebf0; --muted:#9aa6b2; --line:#2b343e; --staff:#6c7782;
+  --accent:#55b6b0; --accent-soft:#1d3434; --on-accent:#0b1c1c;
+  --ok:#52c27f; --ok-soft:#1b3326; --high:#f0805a; --high-soft:#3d241b;
+  --low:#79a3f2; --low-soft:#1e2a42; --miss:#6f7a85; --miss-soft:#232b33; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:700}
+h1{font-family:var(--f-display);font-size:30px;line-height:1.2;margin:0;text-wrap:balance}
+.meta{color:var(--muted);font-size:13px}
+.tabs{display:flex;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;align-self:flex-start}
+.tabs button{border:0;background:transparent;color:var(--muted);font:500 14px var(--f-body);padding:8px 14px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--on-accent)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label.small{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+select,input[type=number]{font:inherit;font-size:14px;padding:5px 8px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.btn{font:500 14px var(--f-body);padding:9px 16px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:focus-visible,.tabs button:focus-visible,.str:focus-visible,select:focus-visible,.nt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.status{font-size:13px;color:var(--accent);min-height:1.4em}
+.notice{font-size:13px;background:var(--accent-soft);border-radius:8px;padding:10px 12px;margin:0}
+/* tuner readouts */
+.tuner{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tbox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tlabel{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.tnote{font-family:var(--f-display);font-size:34px;line-height:1.1}
+.tnote sub{font-size:16px}
+.tcents{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.meter{grid-column:1/-1;position:relative;height:38px;border-radius:8px;background:linear-gradient(90deg,var(--low-soft),var(--ok-soft) 42%,var(--ok-soft) 58%,var(--high-soft))}
+.meter .mid{position:absolute;left:50%;top:4px;bottom:4px;width:2px;background:var(--ok);transform:translateX(-1px)}
+.meter .needle{position:absolute;top:2px;bottom:2px;width:4px;border-radius:2px;background:var(--ink);left:50%;transform:translateX(-2px);transition:left .08s linear}
+.meter .ticks{position:absolute;inset:auto 6px 2px;display:flex;justify-content:space-between;font:500 10px var(--f-mono);color:var(--muted)}
+/* open strings */
+.strings{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.str{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:var(--f-body)}
+.str .sn{font-family:var(--f-display);font-size:26px;line-height:1}
+.str .sn sub{font-size:12px}
+.str .sh{font:500 11px var(--f-mono);color:var(--muted)}
+.str .sd{font-size:11px;color:var(--muted)}
+.str.near{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.str.inTune{background:var(--ok-soft);border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
+.str.drone{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.str.drone .sh,.str.drone .sd{color:var(--on-accent)}
+.verdict{font-weight:700;font-size:15px;min-height:1.5em}
+/* summary */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-family:var(--f-mono);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.ok b{color:var(--ok)} .stat.high b{color:var(--high)} .stat.low b{color:var(--low)} .stat.miss b{color:var(--miss)}
+.tendency{display:flex;flex-direction:column;gap:6px}
+.tendency h2,.sec h2{font-size:15px;margin:0}
+.trow{display:flex;gap:10px;align-items:baseline;font-size:14px;flex-wrap:wrap}
+.trow .n{font-family:var(--f-display);font-size:18px;min-width:46px}
+.trow .v{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+/* engraved score */
+.badge{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:0;min-width:0}
+.sheet svg{display:block;width:100%;height:auto;max-width:100%}
+.sheet .sline{stroke:var(--staff);stroke-width:1}
+.sheet .bar{stroke:var(--ink);stroke-width:1.2}
+.sheet .clef{fill:none;stroke:var(--ink);stroke-width:2.6;stroke-linecap:round}
+.sheet .clefdot{fill:var(--ink)}
+.sheet .bn{fill:var(--muted);font:500 10px var(--f-mono)}
+.sheet .stem{stroke:var(--ink);stroke-width:1.2}
+.sheet .beam{fill:var(--ink)}
+.sheet .ledger{stroke:var(--ink);stroke-width:1.1}
+.sheet .acc{fill:var(--ink);font:15px "Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",serif}
+.nt{cursor:pointer}
+.nt .head{fill:var(--ink)}
+.nt .hit{fill:transparent}
+.nt:hover .hit{fill:var(--accent-soft)}
+.nt .lab{font:500 10px var(--f-mono);text-anchor:middle;fill:var(--muted)}
+.nt.ok .head{fill:var(--ok)} .nt.ok .lab{fill:var(--ok)}
+.nt.high .head{fill:var(--high)} .nt.high .lab{fill:var(--high)}
+.nt.low .head{fill:var(--low)} .nt.low .lab{fill:var(--low)}
+.nt.semi-high .head{fill:var(--high)} .nt.semi-high .lab{fill:var(--high);font-weight:700}
+.nt.semi-low .head{fill:var(--low)} .nt.semi-low .lab{fill:var(--low);font-weight:700}
+.nt .ring{fill:none;stroke-width:1.6}
+.nt.semi-high .ring{stroke:var(--high)} .nt.semi-low .ring{stroke:var(--low)}
+.nt.miss .head{fill:var(--surface);stroke:var(--miss);stroke-width:1.3}
+.nt.miss .lab{fill:var(--miss)}
+.nt.next .hit{fill:var(--accent-soft)}
+.nt.next .cursor{fill:var(--accent)}
+.whole{fill:var(--surface)!important;stroke:var(--ink);stroke-width:1.6}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+summary{cursor:pointer;font-weight:500}
+textarea{width:100%;min-height:220px;font:13px/1.5 var(--f-mono);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:10px}
+@media (max-width:440px){h1{font-size:25px}.tnote{font-size:28px}.str .sn{font-size:22px}}
+@media (prefers-reduced-motion:reduce){.meter .needle{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">CELLO · 음정 연습</span>
+    <h1>도차우어 9번 음정 체크</h1>
+    <span class="meta">A단조 · Allegro moderato · 4/4 · 39마디 · 8분음표 304개</span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-tune" aria-selected="false">개방현 튜닝</button>
+    <button role="tab" id="tab-file" aria-selected="true">녹음 파일 분석</button>
+    <button role="tab" id="tab-live" aria-selected="false">실시간 따라가기</button>
+  </div>
+
+  <section class="panel" id="panel-tune" hidden>
+    <div class="row">
+      <button class="btn" id="tuneBtn">마이크로 듣기</button>
+      <label class="small">기준음 A4 <select id="a4t"><option>440</option><option>441</option><option>442</option><option>443</option></select> Hz</label>
+    </div>
+    <div class="strings" id="strings"></div>
+    <div class="tuner">
+      <div class="tbox"><span class="tlabel">가까운 개방현</span><span class="tnote" id="tuneStr">–</span><span class="tcents" id="tuneHz">&nbsp;</span></div>
+      <div class="tbox"><span class="tlabel">차이</span><span class="tnote" id="tuneCents" style="font-family:var(--f-mono);font-size:28px">–</span><span class="verdict" id="tuneVerdict">&nbsp;</span></div>
+      <div class="meter" aria-hidden="true"><div class="mid"></div><div class="needle" id="tuneNeedle"></div><div class="ticks"><span>−50 낮음</span><span>0</span><span>높음 +50</span></div></div>
+    </div>
+    <p class="notice" id="tuneMsg" hidden></p>
+    <p class="hint">줄 버튼을 누르면 그 음이 계속 울려요(다시 누르면 꺼짐). 기준음과 함께 활을 그으면서 맥놀이(소리가 울렁거리는 것)가 사라질 때까지 맞추세요. A현부터 맞추고 D, G, C 순서로 내려가는 게 일반적이에요.</p>
+  </section>
+
+  <section class="panel" id="panel-file">
+    <div class="row">
+      <span class="btn file">녹음 파일 올리기<input type="file" id="fileInput" accept="audio/*,video/*"></span>
+      <label class="small">기준음 A4 <select id="a4"><option>440</option><option>441</option><option>442</option><option>443</option></select> Hz</label>
+      <label class="small">정확 판정 <select id="tol"><option value="10">±10센트</option><option value="15" selected>±15센트</option><option value="20">±20센트</option></select></label>
+    </div>
+    <p class="hint">휴대폰 음성 메모로 녹음한 파일이면 됩니다. 곡 전체가 아니어도 괜찮아요. 연주한 구간을 자동으로 찾아 맞춰 봅니다. 천천히 연주할수록 더 정확해요.</p>
+    <div class="status" id="fileStatus"></div>
+  </section>
+
+  <section class="panel" id="panel-live" hidden>
+    <div class="row">
+      <button class="btn" id="liveBtn">듣기 시작</button>
+      <label class="small">시작 마디 <input type="number" id="startBar" min="1" max="39" value="1" style="width:64px"></label>
+      <button class="btn ghost" id="liveReset">처음으로</button>
+    </div>
+    <div class="tuner">
+      <div class="tbox"><span class="tlabel">지금 내는 음</span><span class="tnote" id="curNote">–</span><span class="tcents" id="curCents">&nbsp;</span></div>
+      <div class="tbox"><span class="tlabel">악보의 다음 음</span><span class="tnote" id="expNote">–</span><span class="tcents" id="expInfo">&nbsp;</span></div>
+      <div class="meter" aria-hidden="true"><div class="mid"></div><div class="needle" id="needle"></div><div class="ticks"><span>−50 낮음</span><span>0</span><span>높음 +50</span></div></div>
+    </div>
+    <p class="notice" id="liveMsg" hidden></p>
+    <p class="hint">다음 음을 맞게 내면 악보의 음표가 색으로 채워지고 다음 음으로 넘어갑니다. 반음 틀리게 내도 그 자리에 기록돼요.</p>
+  </section>
+
+  <div class="summary scorepart" id="summary"></div>
+
+  <section class="panel tendency" id="tendency" hidden>
+    <h2>자주 어긋나는 음</h2>
+    <div id="tendList"></div>
+  </section>
+
+  <section class="sec scorepart" style="display:flex;flex-direction:column;gap:10px">
+    <div class="row" style="justify-content:space-between">
+      <h2>악보 <span class="badge" id="resultTag">예시 결과</span></h2>
+      <div class="legend">
+        <span><i style="background:var(--ok)"></i>정확</span>
+        <span><i style="background:var(--high)"></i>높음</span>
+        <span><i style="background:var(--low)"></i>낮음</span>
+        <span><i style="background:transparent;border:1.5px solid var(--high);border-radius:50%;width:13px;height:13px;vertical-align:-2px"></i>반음 이상 틀림</span>
+        <span><i style="background:transparent;border:1.3px solid var(--miss)"></i>못 들음</span>
+      </div>
+    </div>
+    <p class="hint" id="resultNote">아래는 1~8마디를 가상으로 연주한 예시예요. 녹음 파일을 올리면 내 연주 결과로 바뀝니다. 음표 아래 숫자는 센트(반음 = 100센트)이고, 음표를 누르면 정확한 음을 들려줘요.</p>
+    <div class="sheet" id="sheet"></div>
+  </section>
+
+  <details id="editBox" class="scorepart">
+    <summary>악보 음표 확인·수정</summary>
+    <p class="hint" style="margin-top:8px">사진에서 옮겨 적은 음표입니다. 틀린 곳이 있으면 고친 뒤 적용을 누르세요. 한 줄이 한 마디이고, 옥타브는 첼로 개방현 기준으로 C2 · G2 · D3 · A3입니다. 샵은 #, 플랫은 b로 적어요.</p>
+    <textarea id="scoreText" spellcheck="false"></textarea>
+    <div class="row" style="margin-top:8px"><button class="btn" id="applyScore">적용</button><button class="btn ghost" id="resetScore">원래대로</button><span class="status" id="editStatus"></span></div>
+  </details>
+</div>
+
+<script>
+const ORIGINAL = `1: A2 B2 C3 D3 E3 F3 E3 D3
+2: C3 B2 A2 B2 A2 C3 B2 A2
+3: D3 E3 F3 G3 A3 Bb3 A3 G3
+4: F3 E3 D3 E3 F3 D3 B2 A2
+5: G2 A2 B2 C3 D3 E3 F3 E3
+6: D3 C3 B2 A2 G2 F2 E2 D2
+7: C2 D2 E2 F2 G2 A2 B2 C3
+8: D3 E3 F3 G3 A3 B3 C4 B3
+9: C4 D4 E4 F4 G4 F#4 G4 F4
+10: E4 F4 E4 D4 C4 D4 C4 B3
+11: A3 B3 C4 C#4 D4 E4 F4 E4
+12: D4 E4 D4 C4 B3 A3 G3 F3
+13: E3 G3 F3 E3 F3 G3 E3 F3
+14: D3 F3 E3 D3 E3 F3 D3 E3
+15: C3 E3 D3 C3 D3 E3 C3 D3
+16: B2 D3 C3 B2 C3 D3 Bb2 G2
+17: F2 G2 A2 Bb2 C3 D3 C3 B2
+18: A2 Bb2 A2 G2 F2 A2 G2 F2
+19: E2 F2 G2 A2 Bb2 C3 Bb2 A2
+20: F2 G2 F2 E2 D2 C2 D2 E2
+21: F2 G2 A2 Bb2 C3 D3 C3 Bb2
+22: A2 Bb2 A2 G2 F#2 D2 E2 F#2
+23: G2 A2 B2 C3 D3 E3 D3 C3
+24: B2 C3 B2 A2 G#2 B2 A2 G#2
+25: G2 A2 B2 C3 D3 B2 A2 G2
+26: A2 B2 C3 D3 E3 C3 B2 A2
+27: C3 D3 E3 F3 G3 F3 E3 D3
+28: C#3 D3 E3 F3 G3 E3 D3 C#3
+29: D3 E3 F3 G3 A3 G3 F3 E3
+30: D3 E3 F3 G3 F3 E3 D3 C3
+31: A2 B2 C3 D3 C3 B2 A2 G2
+32: G#2 A2 B2 A2 G#2 B2 A2 G#2
+33: A2 B2 C3 D3 E3 F3 E3 D3
+34: C3 B2 A2 C3 E3 F3 E3 D3
+35: C3 A2 B2 C3 D3 E3 F#3 G#3
+36: A3 B3 C4 D4 E4 F#4 G#4 A4
+37: A4 G4 F4 E4 D4 C4 B3 A3
+38: A3 G3 F3 E3 D3 C3 B2 A2
+39: A2`;
+
+const PC = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const NAMES = ['C','C♯','D','E♭','E','F','F♯','G','G♯','A','B♭','B'];
+let SCORE = [];
+function parseScore(text){
+  const out=[]; const errs=[];
+  text.split('\n').forEach((line,li)=>{
+    const t=line.trim(); if(!t) return;
+    const m=t.match(/^(\d+)\s*:\s*(.*)$/); if(!m){errs.push(li+1);return;}
+    const bar=+m[1];
+    m[2].trim().split(/\s+/).forEach(tok=>{
+      const q=tok.match(/^([A-Ga-g])(#|b|♯|♭)?(\d)$/);
+      if(!q){errs.push(li+1);return;}
+      const L=q[1].toUpperCase(), acc=q[2]==='#'||q[2]==='♯'?1:(q[2]==='b'||q[2]==='♭'?-1:0);
+      const midi=12*(+q[3]+1)+PC[L]+acc;
+      out.push({bar,name:L+(acc>0?'♯':acc<0?'♭':''),letter:L,acc,oct:+q[3],midi});
+    });
+  });
+  return {notes:out.map((n,i)=>({...n,idx:i})),errs};
+}
+function midiName(m){const r=Math.round(m);return NAMES[((r%12)+12)%12]+(Math.floor(r/12)-1);}
+
+/* ---------- pitch detection (YIN) ---------- */
+const DSR_TARGET = 11025;
+function makeYin(dsr){
+  const tauMax=Math.ceil(dsr/58), tauMin=Math.floor(dsr/900), W=Math.round(dsr*0.035);
+  const d=new Float32Array(tauMax+2), cm=new Float32Array(tauMax+2);
+  return {frameLen:W+tauMax+2, run(buf,off){
+    let e=0; for(let i=0;i<W;i++){const v=buf[off+i];e+=v*v;}
+    const rms=Math.sqrt(e/W);
+    for(let tau=1;tau<=tauMax+1;tau++){let s=0;for(let i=0;i<W;i++){const df=buf[off+i]-buf[off+i+tau];s+=df*df;}d[tau]=s;}
+    cm[0]=1;let run=0;
+    for(let tau=1;tau<=tauMax+1;tau++){run+=d[tau];cm[tau]=run>0?d[tau]*tau/run:1;}
+    let tau=-1;
+    for(let t=tauMin;t<=tauMax;t++){if(cm[t]<0.15){while(t+1<=tauMax&&cm[t+1]<cm[t])t++;tau=t;break;}}
+    if(tau<0){let best=1e9;for(let t=tauMin;t<=tauMax;t++)if(cm[t]<best){best=cm[t];tau=t;} if(best>0.3)return {rms,f:0};}
+    const x0=cm[tau-1],x1=cm[tau],x2=cm[tau+1],den=x0-2*x1+x2;
+    const bt=den!==0?tau+(x0-x2)/(2*den):tau;
+    return {rms,f:dsr/bt,conf:1-x1};
+  }};
+}
+function toMidi(f,a4){return 69+12*Math.log2(f/a4);}
+
+function trackFrames(data,dsr,a4,onProgress){
+  return new Promise(res=>{
+    const y=makeYin(dsr), hop=Math.round(dsr*0.0145), frames=[];
+    let off=0;
+    function chunk(){
+      const t0=performance.now();
+      while(off+y.frameLen<data.length){
+        const r=y.run(data,off);
+        frames.push({t:off/dsr,rms:r.rms,midi:r.f?toMidi(r.f,a4):null});
+        off+=hop;
+        if(performance.now()-t0>30)break;
+      }
+      if(onProgress)onProgress(off/data.length);
+      if(off+y.frameLen<data.length)setTimeout(chunk,0);else res({frames,hop:hop/dsr});
+    }
+    chunk();
+  });
+}
+function median(a){const s=[...a].sort((x,y)=>x-y);return s.length?s[s.length>>1]:NaN;}
+function segment(frames,hopSec){
+  const rmsList=frames.map(f=>f.rms).sort((a,b)=>a-b);
+  const loud=rmsList[Math.floor(rmsList.length*0.95)]||0;
+  const gate=loud*0.08;
+  const segs=[];let cur=null,gap=0;
+  const close=()=>{
+    if(cur&&cur.vals.length>=4){
+      const n=cur.vals.length,cut=Math.floor(n*0.2);
+      const core=cur.vals.slice(cut,n-cut);
+      segs.push({t0:cur.t0,t1:cur.t1,midi:median(core),n});
+    }cur=null;
+  };
+  for(const f of frames){
+    const voiced=f.midi!==null&&f.rms>gate&&f.midi>30&&f.midi<90;
+    if(!voiced){gap++;if(gap>=2)close();continue;}
+    gap=0;
+    if(cur){
+      const ref=median(cur.vals.slice(-5));
+      if(Math.abs(f.midi-ref)>0.5){close();}
+    }
+    if(!cur)cur={t0:f.t,t1:f.t,vals:[]};
+    cur.vals.push(f.midi);cur.t1=f.t+hopSec;
+  }
+  close();
+  return segs;
+}
+
+/* ---------- alignment of played notes to the score ---------- */
+function adjust(d){
+  if(Math.abs(d)>6){const d2=d-12*Math.round(d/12);if(Math.abs(d2)<=1.5)return d2;}
+  return d;
+}
+function matchCost(d){const a=Math.abs(d);if(a>2.5)return 99;return a<=0.5?a*0.4:0.2+(a-0.5)*0.9;}
+function align(score,segs){
+  const n=score.length,m=segs.length,INS=0.7,DEL=1.0;
+  const W=m+1, dp=new Float32Array((n+1)*W), bt=new Uint8Array((n+1)*W);
+  for(let i=0;i<=n;i++){dp[i*W]=0;bt[i*W]=2;}
+  for(let j=1;j<=m;j++){dp[j]=dp[j-1]+INS;bt[j]=3;}
+  for(let i=1;i<=n;i++)for(let j=1;j<=m;j++){
+    const d=adjust(segs[j-1].midi-score[i-1].midi);
+    let best=dp[(i-1)*W+j-1]+matchCost(d),b=1;
+    const del=dp[(i-1)*W+j]+DEL; if(del<best){best=del;b=2;}
+    const ins=dp[i*W+j-1]+(segs[j-1].n<7?INS*0.7:INS); if(ins<best){best=ins;b=3;}
+    dp[i*W+j]=best;bt[i*W+j]=b;
+  }
+  let bi=0,bv=1e9;for(let i=0;i<=n;i++)if(dp[i*W+m]<bv){bv=dp[i*W+m];bi=i;}
+  const res=new Array(n).fill(null);let i=bi,j=m;
+  while(i>0&&j>0){const b=bt[i*W+j];
+    if(b===1){res[i-1]={cents:adjust(segs[j-1].midi-score[i-1].midi)*100,played:segs[j-1].midi};i--;j--;}
+    else if(b===2)i--;else j--;}
+  let first=res.findIndex(r=>r),last=res.length-1-[...res].reverse().findIndex(r=>r);
+  if(first<0)return null;
+  return res.map((r,k)=>k<first||k>last?undefined:(r||'miss'));
+}
+
+/* ---------- classification ---------- */
+function classify(c,tol){
+  const a=Math.abs(c);
+  if(a<=tol)return 'ok';
+  if(a<=65)return c>0?'high':'low';
+  return c>0?'semi-high':'semi-low';
+}
+let RESULT=null, IS_DEMO=true, LIVE_CUR=-1;
+const $=id=>document.getElementById(id);
+function tol(){return +$('tol').value;}
+
+/* ---------- engraving: bass-clef staff in SVG ---------- */
+const GAP=10, TOPL=52, BOTL=TOPL+4*GAP, LAB_Y=BOTL+42, SVG_H=LAB_Y+10;
+const CLEF_W=46, NOTE_DX=29, BEAT_GAP=8, M_PAD=14;
+const M_W=M_PAD+8*NOTE_DX+BEAT_GAP;
+const stepOf=n=>n.oct*7+'CDEFGAB'.indexOf(n.letter);
+const yOf=s=>BOTL-(s-18)*GAP/2;   // G2 (step 18) sits on the bottom line
+function svgEl(tag,attrs,parent){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+
+function drawClef(g){
+  const F=TOPL+GAP; // F3 line
+  svgEl('path',{class:'clef',d:`M10 ${F} C9 ${F-12} 30 ${F-15} 31 ${F-1} C32 ${F+14} 20 ${F+25} 6 ${F+30}`},g);
+  svgEl('circle',{class:'clefdot',cx:11.5,cy:F,r:4.2},g);
+  svgEl('circle',{class:'clefdot',cx:38,cy:F-5,r:2.2},g);
+  svgEl('circle',{class:'clefdot',cx:38,cy:F+5,r:2.2},g);
+}
+function noteClass(n){
+  const r=RESULT?RESULT[n.idx]:undefined;
+  let cls='nt',txt='';
+  if(r==='miss'){cls+=' miss';txt='—';}
+  else if(r){cls+=' '+classify(r.cents,tol());const v=Math.round(r.cents);txt=(v>0?'+':v<0?'−':'±')+Math.abs(v);}
+  if(n.idx===LIVE_CUR)cls+=' next';
+  return {cls,txt,r};
+}
+function drawMeasure(g,notes,x0){
+  // bar number
+  svgEl('text',{class:'bn',x:x0+3,y:12},g).textContent=notes[0].bar;
+  if(notes.length===1){ // final whole note
+    const n=notes[0],x=x0+M_W/2,y=yOf(stepOf(n));
+    drawNote(g,n,x,y,true);
+  }else{
+    for(let b=0;b<notes.length;b+=4){
+      const grp=notes.slice(b,b+4);
+      const xs=grp.map((n,i)=>x0+M_PAD+(b+i)*NOTE_DX+(b>=4?BEAT_GAP:0));
+      const steps=grp.map(stepOf),ys=steps.map(yOf);
+      const up=steps.reduce((a,c)=>a+c,0)/steps.length<22;
+      const sx=xs.map(x=>up?x+4.6:x-4.6);
+      const L=26,MIN=21;
+      let y1=up?ys[0]-L:ys[0]+L,y2=up?ys[ys.length-1]-L:ys[ys.length-1]+L;
+      const dx=sx[sx.length-1]-sx[0]||1;let slope=(y2-y1)/dx;slope=Math.max(-0.12,Math.min(0.12,slope));
+      let beamY=x=>y1+slope*(x-sx[0]);
+      let shift=0;ys.forEach((y,i)=>{const need=up?(y-MIN)-beamY(sx[i]):beamY(sx[i])-(y+MIN);if(need<shift)shift=need;});
+      const by=x=>beamY(x)+(up?shift:-shift);
+      ys.forEach((y,i)=>svgEl('line',{class:'stem',x1:sx[i],y1:y+(up?-1:1),x2:sx[i],y2:by(sx[i])},g));
+      const a=sx[0],c=sx[sx.length-1],t=up?4.5:-4.5;
+      svgEl('polygon',{class:'beam',points:`${a},${by(a)} ${c},${by(c)} ${c},${by(c)+t} ${a},${by(a)+t}`},g);
+      grp.forEach((n,i)=>drawNote(g,n,xs[i],ys[i],false));
+    }
+  }
+  svgEl('line',{class:'bar',x1:x0+M_W,y1:TOPL,x2:x0+M_W,y2:BOTL},g);
+}
+function drawNote(g,n,x,y,whole){
+  const s=stepOf(n);
+  for(let l=16;l>=s;l-=2)svgEl('line',{class:'ledger',x1:x-8.5,y1:yOf(l),x2:x+8.5,y2:yOf(l)},g);
+  for(let l=28;l<=s;l+=2)svgEl('line',{class:'ledger',x1:x-8.5,y1:yOf(l),x2:x+8.5,y2:yOf(l)},g);
+  if(n.acc)svgEl('text',{class:'acc',x:x-15,y:y+5},g).textContent=n.acc>0?'♯':'♭';
+  const {cls,txt,r}=noteClass(n);
+  const ng=svgEl('g',{class:cls,tabindex:0,role:'button','aria-label':`${n.bar}마디 ${n.name}${n.oct}${txt?' '+txt+'센트':''}`},g);
+  svgEl('rect',{class:'hit',x:x-12,y:4,width:24,height:SVG_H-6,rx:5},ng);
+  if(n.idx===LIVE_CUR)svgEl('polygon',{class:'cursor',points:`${x-5},${SVG_H-2} ${x+5},${SVG_H-2} ${x},${SVG_H-8}`},ng);
+  const head=svgEl('ellipse',{class:'head'+(whole?' whole':''),cx:x,cy:y,rx:whole?6.6:5.4,ry:whole?4.4:3.9,transform:whole?'':`rotate(-22 ${x} ${y})`},ng);
+  if(cls.includes('semi'))svgEl('circle',{class:'ring',cx:x,cy:y,r:9},ng);
+  if(txt)svgEl('text',{class:'lab',x,y:LAB_Y},ng).textContent=txt;
+  const title=svgEl('title',{},ng);
+  title.textContent=r&&r!=='miss'?`${n.bar}마디 ${n.name}${n.oct}: ${Math.round(r.cents)}센트 (연주한 음 ${midiName(r.played)})`:`${n.bar}마디 ${n.name}${n.oct}`;
+  const play=()=>playTone(n.midi);
+  ng.addEventListener('click',play);
+  ng.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();play();}});
+}
+let lastPerRow=0;
+function renderScore(){
+  const box=$('sheet');
+  const avail=Math.max(280,box.clientWidth-20);
+  const perRow=Math.max(1,Math.floor((avail-CLEF_W)/M_W));lastPerRow=perRow;
+  const bars={};SCORE.forEach(n=>(bars[n.bar]=bars[n.bar]||[]).push(n));
+  const keys=Object.keys(bars).map(Number).sort((a,b)=>a-b);
+  box.innerHTML='';
+  for(let r=0;r<keys.length;r+=perRow){
+    const ks=keys.slice(r,r+perRow),W=CLEF_W+perRow*M_W+2;
+    const svg=svgEl('svg',{viewBox:`0 0 ${W} ${SVG_H}`,width:W,height:SVG_H},box);
+    const g=svgEl('g',{},svg);
+    const lineEnd=CLEF_W+ks.length*M_W;
+    for(let i=0;i<5;i++)svgEl('line',{class:'sline',x1:2,y1:TOPL+i*GAP,x2:lineEnd,y2:TOPL+i*GAP},g);
+    svgEl('line',{class:'bar',x1:2,y1:TOPL,x2:2,y2:BOTL},g);
+    drawClef(g);
+    ks.forEach((k,i)=>drawMeasure(g,bars[k],CLEF_W+i*M_W));
+  }
+}
+let rz=0;
+window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{
+  const perRow=Math.max(1,Math.floor((Math.max(280,$('sheet').clientWidth-20)-CLEF_W)/M_W));
+  if(perRow!==lastPerRow)renderScore();},150);});
+
+function renderSummary(){
+  const s=$('summary');
+  if(!RESULT){s.innerHTML='';$('tendency').hidden=true;return;}
+  const t=tol();let cnt={ok:0,high:0,low:0,semi:0,miss:0},total=0;
+  const byNote={};
+  SCORE.forEach(n=>{const r=RESULT[n.idx];if(r===undefined)return;total++;
+    if(r==='miss'){cnt.miss++;return;}
+    const cl=classify(r.cents,t);
+    if(cl==='ok')cnt.ok++;else if(cl==='high')cnt.high++;else if(cl==='low')cnt.low++;else cnt.semi++;
+    if(Math.abs(r.cents)<=65){const k=n.name+n.oct;(byNote[k]=byNote[k]||[]).push(r.cents);}
+  });
+  const pct=total?Math.round(cnt.ok/(total-cnt.miss||1)*100):0;
+  const range=(()=>{const idx=SCORE.filter(n=>RESULT[n.idx]!==undefined);return idx.length?`${idx[0].bar}~${idx[idx.length-1].bar}마디`:'';})();
+  s.innerHTML=`<div class="stat"><b>${pct}%</b><span>정확한 음 비율 · ${range}</span></div>
+  <div class="stat ok"><b>${cnt.ok}</b><span>정확 (±${t}센트)</span></div>
+  <div class="stat high"><b>${cnt.high}</b><span>약간 높음</span></div>
+  <div class="stat low"><b>${cnt.low}</b><span>약간 낮음</span></div>
+  <div class="stat high"><b>${cnt.semi}</b><span>반음 이상 틀림</span></div>
+  <div class="stat miss"><b>${cnt.miss}</b><span>못 들은 음</span></div>`;
+  const rows=Object.entries(byNote).filter(([,v])=>v.length>=2)
+    .map(([k,v])=>({k,avg:v.reduce((a,b)=>a+b,0)/v.length,n:v.length}))
+    .filter(r=>Math.abs(r.avg)>t*0.8).sort((a,b)=>Math.abs(b.avg)-Math.abs(a.avg)).slice(0,5);
+  $('tendency').hidden=!rows.length||!$('panel-tune').hidden;
+  $('tendList').innerHTML=rows.map(r=>{const v=Math.round(r.avg);
+    return `<div class="trow"><span class="n">${r.k.replace(/(\d)$/,'<sub style="font-size:11px">$1</sub>')}</span><span class="v" style="color:var(--${v>0?'high':'low'})">${v>0?'+':'−'}${Math.abs(v)}센트</span><span class="hint">평균 ${v>0?'높게':'낮게'} · ${r.n}번 나옴</span></div>`}).join('');
+}
+function renderAll(){renderSummary();renderScore();}
+
+/* ---------- reference tones ---------- */
+let actx=null;
+function ctx(){if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx;}
+function voice(c,f,peak){
+  const o=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();
+  o.type='sawtooth';o.frequency.value=f;lp.type='lowpass';lp.frequency.value=Math.min(1800,f*5);
+  o.connect(lp);lp.connect(g);g.connect(c.destination);g.gain.value=0;return {o,g};
+}
+function playTone(midi){
+  try{const c=ctx(),a4=+$('a4').value,f=a4*Math.pow(2,(midi-69)/12),{o,g}=voice(c,f);
+    const t=c.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.18,t+0.06);g.gain.setValueAtTime(0.18,t+0.9);g.gain.linearRampToValueAtTime(0,t+1.2);
+    o.start(t);o.stop(t+1.25);
+  }catch(e){}
+}
+let drone=null;
+function stopDrone(){if(!drone)return;try{const t=actx.currentTime;drone.g.gain.cancelScheduledValues(t);drone.g.gain.setValueAtTime(drone.g.gain.value,t);drone.g.gain.linearRampToValueAtTime(0,t+0.15);drone.o.stop(t+0.2);}catch(e){}drone=null;renderStrings();}
+function startDrone(i){
+  stopDrone();
+  try{const c=ctx(),f=+$('a4t').value*Math.pow(2,(STRINGS[i].midi-69)/12),v=voice(c,f);
+    v.g.gain.linearRampToValueAtTime(0.16,c.currentTime+0.12);v.o.start();drone={...v,i};}catch(e){}
+  renderStrings();
+}
+
+/* ---------- file analysis ---------- */
+async function analyzeFile(file){
+  const st=$('fileStatus');st.textContent='파일을 여는 중…';
+  try{
+    const buf=await file.arrayBuffer();
+    const off=new OfflineAudioContext(1,1,DSR_TARGET);
+    const audio=await off.decodeAudioData(buf);
+    const len=audio.length,data=new Float32Array(len);
+    for(let ch=0;ch<audio.numberOfChannels;ch++){const c=audio.getChannelData(ch);for(let i=0;i<len;i++)data[i]+=c[i]/audio.numberOfChannels;}
+    st.textContent=`음높이 분석 중… (${Math.round(len/audio.sampleRate)}초)`;
+    const {frames,hop}=await trackFrames(data,audio.sampleRate,+$('a4').value,p=>{st.textContent=`음높이 분석 중… ${Math.round(p*100)}%`;});
+    const segs=segment(frames,hop);
+    const res=align(SCORE,segs);
+    if(!res||res.filter(r=>r&&r!=='miss').length<4){st.textContent='악보와 맞는 음을 거의 찾지 못했어요. 첼로 소리가 크게 들어가도록 가까이서 다시 녹음해 보세요.';return;}
+    RESULT=res;IS_DEMO=false;LIVE_CUR=-1;
+    $('resultTag').textContent=file.name.length>24?file.name.slice(0,22)+'…':file.name;
+    $('resultNote').textContent='음표 아래 숫자는 센트(반음 = 100센트)이고, +는 높게, −는 낮게 낸 것입니다. 음표를 누르면 정확한 음을 들려줘요.';
+    st.textContent=`분석 완료 · 들린 음 ${segs.length}개`;
+    renderAll();
+  }catch(e){st.textContent='이 파일은 열 수 없어요. m4a, mp3, wav 파일로 다시 올려 주세요.';}
+}
+$('fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(f)analyzeFile(f);e.target.value='';});
+$('tol').addEventListener('change',renderAll);
+$('a4').addEventListener('change',()=>{$('a4t').value=$('a4').value;});
+$('a4t').addEventListener('change',()=>{$('a4').value=$('a4t').value;if(drone)startDrone(drone.i);renderStrings();});
+
+/* ---------- microphone engine (shared by tuner and live follow) ---------- */
+let mic=null;
+const MIC_BLOCKED='이 화면에서는 마이크를 쓸 수 없어요. 대화에 함께 보내 드린 HTML 파일을 컴퓨터나 휴대폰 브라우저(크롬 권장)로 열면 마이크 기능을 쓸 수 있어요.';
+async function micStart(onFrame){
+  const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  const c=ctx(),src=c.createMediaStreamSource(stream),an=c.createAnalyser();an.fftSize=4096;src.connect(an);
+  const fac=Math.max(1,Math.round(c.sampleRate/DSR_TARGET)),dsr=c.sampleRate/fac,y=makeYin(dsr);
+  const raw=new Float32Array(an.fftSize),ds=new Float32Array(Math.floor(an.fftSize/fac));
+  mic={stream,raf:0};
+  const loop=()=>{mic.raf=requestAnimationFrame(loop);
+    an.getFloatTimeDomainData(raw);
+    for(let i=0;i<ds.length;i++){let s=0;for(let k=0;k<fac;k++)s+=raw[i*fac+k];ds[i]=s/fac;}
+    const r=y.run(ds,ds.length-y.frameLen);
+    onFrame(r.f&&r.rms>0.006?r.f:0,r.rms);};
+  loop();
+}
+function micStop(){if(!mic)return;cancelAnimationFrame(mic.raf);mic.stream.getTracks().forEach(t=>t.stop());mic=null;
+  $('liveBtn').textContent='듣기 시작';$('tuneBtn').textContent='마이크로 듣기';}
+
+/* ---------- open-string tuner ---------- */
+const STRINGS=[{l:'C',o:2,midi:36,ko:'4번 줄'},{l:'G',o:2,midi:43,ko:'3번 줄'},{l:'D',o:3,midi:50,ko:'2번 줄'},{l:'A',o:3,midi:57,ko:'1번 줄'}];
+let tuneNear=-1,tuneOk=false,tuneHist=[];
+function renderStrings(){
+  const a4=+$('a4t').value;
+  $('strings').innerHTML=STRINGS.map((s,i)=>`<button class="str${drone&&drone.i===i?' drone':''}${tuneNear===i?(tuneOk?' inTune':' near'):''}" data-i="${i}" aria-pressed="${!!(drone&&drone.i===i)}">
+    <span class="sn">${s.l}<sub>${s.o}</sub></span><span class="sh">${(a4*Math.pow(2,(s.midi-69)/12)).toFixed(1)} Hz</span><span class="sd">${drone&&drone.i===i?'울리는 중':s.ko}</span></button>`).join('');
+  $('strings').querySelectorAll('.str').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i;drone&&drone.i===i?stopDrone():startDrone(i);}));
+}
+function tuneFrame(f){
+  if(!f){tuneHist=[];return;}
+  const m=toMidi(f,+$('a4t').value);
+  tuneHist.push(m);if(tuneHist.length>8)tuneHist.shift();
+  const mm=median(tuneHist);
+  let best=0,bd=99;STRINGS.forEach((s,i)=>{const d=Math.abs(adjust(mm-s.midi));if(d<bd){bd=d;best=i;}});
+  if(bd>1.5){$('tuneVerdict').textContent='개방현과 너무 멀어요';return;}
+  const s=STRINGS[best],c=adjust(mm-s.midi)*100,ok=Math.abs(c)<=5;
+  if(best!==tuneNear||ok!==tuneOk){tuneNear=best;tuneOk=ok;renderStrings();}
+  $('tuneStr').innerHTML=`${s.l}<sub>${s.o}</sub>`;
+  $('tuneHz').textContent=`${f.toFixed(1)} Hz 들림`;
+  $('tuneCents').textContent=`${c>0?'+':c<0?'−':'±'}${Math.abs(Math.round(c))}`;
+  $('tuneCents').style.color=`var(--${ok?'ok':c>0?'high':'low'})`;
+  $('tuneVerdict').textContent=ok?'맞았어요':c>0?'높아요 · 줄을 조금 풀어 주세요':'낮아요 · 줄을 조금 감아 주세요';
+  $('tuneVerdict').style.color=`var(--${ok?'ok':c>0?'high':'low'})`;
+  $('tuneNeedle').style.left=`calc(${50+Math.max(-50,Math.min(50,c))}% - 2px)`;
+}
+$('tuneBtn').addEventListener('click',async()=>{
+  if(mic){micStop();return;}
+  $('tuneMsg').hidden=true;
+  try{await micStart(tuneFrame);$('tuneBtn').textContent='듣기 멈춤';}
+  catch(e){$('tuneMsg').hidden=false;$('tuneMsg').textContent=MIC_BLOCKED+' 지금은 줄 버튼으로 기준음을 들으며 귀로 맞출 수 있어요.';}
+});
+
+/* ---------- live follow ---------- */
+let L=null;
+function setLiveCursor(i){LIVE_CUR=Math.max(0,Math.min(SCORE.length-1,i));const n=SCORE[LIVE_CUR];
+  $('expNote').innerHTML=n?`${n.name}<sub>${n.oct}</sub>`:'–';$('expInfo').textContent=n?`${n.bar}마디 · ${n.idx-SCORE.findIndex(x=>x.bar===n.bar)+1}번째 음`:'';renderScore();}
+function liveRecord(i,cents,played){if(!RESULT||IS_DEMO){RESULT=new Array(SCORE.length).fill(undefined);IS_DEMO=false;$('resultTag').textContent='실시간 연주';}
+  RESULT[i]={cents,played};}
+async function startLive(){
+  const msg=$('liveMsg');msg.hidden=true;
+  if(LIVE_CUR<0)setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));
+  L={hist:[],note:null,peak:0,quiet:0};
+  try{await micStart(liveFrame);$('liveBtn').textContent='듣기 멈춤';}
+  catch(e){msg.hidden=false;msg.textContent=MIC_BLOCKED+' 지금은 녹음 파일 분석을 이용해 주세요.';}
+}
+function liveFrame(f,rms){
+  const a4=+$('a4').value,midi=f?toMidi(f,a4):null;
+  if(midi!==null){const near=Math.round(midi),c=(midi-near)*100;
+    $('curNote').innerHTML=`${NAMES[((near%12)+12)%12]}<sub>${Math.floor(near/12)-1}</sub>`;
+    $('curCents').textContent=`${c>0?'+':c<0?'−':'±'}${Math.abs(Math.round(c))}센트`;
+    $('needle').style.left=`calc(${50+Math.max(-50,Math.min(50,c))}% - 2px)`;}
+  else{$('curCents').innerHTML='&nbsp;';}
+  const exp=SCORE[LIVE_CUR];if(!exp)return;
+  const finish=()=>{if(L.note&&L.note.vals.length>=6){const md=median(L.note.vals);liveRecord(L.note.i,md*100,SCORE[L.note.i].midi+md);
+      if(L.note.i<SCORE.length-1)setLiveCursor(L.note.i+1);else renderScore();renderSummary();}L.note=null;L.peak=0;};
+  if(midi===null){L.quiet++;if(L.quiet>=3)finish();L.hist=[];return;}
+  L.quiet=0;L.hist.push(midi);if(L.hist.length>6)L.hist.shift();
+  if(L.note){
+    const d=adjust(midi-SCORE[L.note.i].midi);
+    if(Math.abs(d-median(L.note.vals))>0.5||rms<L.peak*0.45){finish();}
+    else{L.note.vals.push(d);L.peak=Math.max(L.peak,rms);return;}
+  }
+  if(L.hist.length<5)return;
+  const h=median(L.hist);if(L.hist.some(v=>Math.abs(v-h)>0.3))return;
+  const dExp=adjust(h-exp.midi),nxt=SCORE[LIVE_CUR+1];
+  const dNext=nxt?adjust(h-nxt.midi):99;
+  if(Math.abs(dNext)<=0.4&&Math.abs(dExp)>0.6){if(!RESULT||IS_DEMO){RESULT=new Array(SCORE.length).fill(undefined);IS_DEMO=false;}RESULT[LIVE_CUR]='miss';LIVE_CUR++;L.note={i:LIVE_CUR,vals:[dNext]};L.peak=rms;return;}
+  if(Math.abs(dExp)<=1.6){L.note={i:LIVE_CUR,vals:[dExp]};L.peak=rms;}
+}
+$('liveBtn').addEventListener('click',()=>mic?micStop():startLive());
+$('liveReset').addEventListener('click',()=>{RESULT=null;IS_DEMO=false;$('resultTag').textContent='실시간 연주';setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));renderSummary();});
+$('startBar').addEventListener('change',()=>{if($('panel-live').hidden)return;setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));});
+
+/* ---------- tabs ---------- */
+function showTab(which){
+  micStop();
+  ['tune','file','live'].forEach(k=>{$('tab-'+k).setAttribute('aria-selected',k===which);$('panel-'+k).hidden=k!==which;});
+  document.querySelectorAll('.scorepart').forEach(el=>el.hidden=which==='tune');
+  if(which!=='tune')stopDrone();
+  if(which==='live'){if(LIVE_CUR<0)setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));}
+  else{LIVE_CUR=-1;}
+  renderAll();
+}
+['tune','file','live'].forEach(k=>$('tab-'+k).addEventListener('click',()=>showTab(k)));
+
+/* ---------- score editor ---------- */
+function loadScore(text){const p=parseScore(text);if(!p.notes.length)return false;SCORE=p.notes;return p;}
+$('applyScore').addEventListener('click',()=>{const p=parseScore($('scoreText').value);
+  if(p.errs.length){$('editStatus').textContent=`${[...new Set(p.errs)].join(', ')}번째 줄을 읽을 수 없어요.`;return;}
+  SCORE=p.notes;RESULT=null;LIVE_CUR=-1;try{localStorage.setItem('dz9score',$('scoreText').value);}catch(e){}
+  $('editStatus').textContent='적용했어요.';renderAll();});
+$('resetScore').addEventListener('click',()=>{$('scoreText').value=ORIGINAL;try{localStorage.removeItem('dz9score');}catch(e){}$('applyScore').click();});
+
+/* ---------- demo: synthetic performance of bars 1–8 ---------- */
+function synthDemo(notes,a4,sr){
+  const dur=0.26,errs={5:24,12:-27,19:-100,27:'skip',33:42,40:-14,46:31,52:-35,58:100};
+  const parts=[];notes.forEach((n,i)=>{if(errs[i]==='skip')return;parts.push({midi:n.midi+(errs[i]||0)/100});});
+  const len=Math.ceil(parts.length*dur*sr)+sr,out=new Float32Array(len);
+  parts.forEach((p,k)=>{const f0=a4*Math.pow(2,(p.midi-69)/12),s0=Math.floor(k*dur*sr),N=Math.floor(dur*sr*0.96);
+    let ph=0;for(let i=0;i<N;i++){const t=i/sr,vib=Math.pow(2,(12*Math.sin(2*Math.PI*5.5*t))/1200);ph+=2*Math.PI*f0*vib/sr;
+      const env=Math.min(1,t/0.02)*Math.min(1,(N-i)/(sr*0.02));let v=0;for(let h=1;h<=6;h++)v+=Math.sin(ph*h)/h*(h===1?0.7:1);
+      out[s0+i]+=0.2*env*v+(Math.random()-0.5)*0.004;}});
+  return out;
+}
+async function runDemo(){
+  const a4=440,sr=DSR_TARGET,part=SCORE.filter(n=>n.bar<=8);
+  const data=synthDemo(part,a4,sr);
+  const {frames,hop}=await trackFrames(data,sr,a4);
+  const res=align(SCORE,segment(frames,hop));
+  if(IS_DEMO){RESULT=res;renderAll();}
+}
+
+/* ---------- boot ---------- */
+let saved=null;try{saved=localStorage.getItem('dz9score');}catch(e){}
+$('scoreText').value=saved||ORIGINAL;
+if(!loadScore(saved||ORIGINAL))loadScore(ORIGINAL);
+renderStrings();
+renderAll();
+runDemo();
+</script>
+</body></html>
