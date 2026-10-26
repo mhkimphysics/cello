@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>도차우어 9번 음정 체크</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>Dotzauer No. 9 Intonation</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Mono:wght@500&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
@@ -123,84 +123,84 @@ textarea{width:100%;min-height:220px;font:13px/1.5 var(--f-mono);background:var(
 
 <div class="wrap">
   <header>
-    <span class="eyebrow">CELLO · 음정 연습</span>
-    <h1>도차우어 9번 음정 체크</h1>
-    <span class="meta">A단조 · Allegro moderato · 4/4 · 39마디 · 8분음표 304개</span>
+    <span class="eyebrow">CELLO · INTONATION PRACTICE</span>
+    <h1>Dotzauer No. 9 Intonation</h1>
+    <span class="meta">A minor · Allegro moderato · 4/4 · 39 bars · 304 eighth notes</span>
   </header>
 
   <div class="tabs" role="tablist">
-    <button role="tab" id="tab-tune" aria-selected="false">개방현 튜닝</button>
-    <button role="tab" id="tab-file" aria-selected="true">녹음 파일 분석</button>
-    <button role="tab" id="tab-live" aria-selected="false">실시간 따라가기</button>
+    <button role="tab" id="tab-tune" aria-selected="false">Tune Open Strings</button>
+    <button role="tab" id="tab-file" aria-selected="true">Analyze Recording</button>
+    <button role="tab" id="tab-live" aria-selected="false">Live Follow</button>
   </div>
 
   <section class="panel" id="panel-tune" hidden>
     <div class="row">
-      <button class="btn" id="tuneBtn">마이크로 듣기</button>
-      <label class="small">기준음 A4 <select id="a4t"><option>440</option><option>441</option><option>442</option><option>443</option></select> Hz</label>
+      <button class="btn" id="tuneBtn">Listen with Mic</button>
+      <label class="small">A4 = <select id="a4t"><option>440</option><option>441</option><option>442</option><option>443</option></select> Hz</label>
     </div>
     <div class="strings" id="strings"></div>
     <div class="tuner">
-      <div class="tbox"><span class="tlabel">가까운 개방현</span><span class="tnote" id="tuneStr">–</span><span class="tcents" id="tuneHz">&nbsp;</span></div>
-      <div class="tbox"><span class="tlabel">차이</span><span class="tnote" id="tuneCents" style="font-family:var(--f-mono);font-size:28px">–</span><span class="verdict" id="tuneVerdict">&nbsp;</span></div>
-      <div class="meter" aria-hidden="true"><div class="mid"></div><div class="needle" id="tuneNeedle"></div><div class="ticks"><span>−50 낮음</span><span>0</span><span>높음 +50</span></div></div>
+      <div class="tbox"><span class="tlabel">Nearest string</span><span class="tnote" id="tuneStr">–</span><span class="tcents" id="tuneHz">&nbsp;</span></div>
+      <div class="tbox"><span class="tlabel">Offset (cents)</span><span class="tnote" id="tuneCents" style="font-family:var(--f-mono);font-size:28px">–</span><span class="verdict" id="tuneVerdict">&nbsp;</span></div>
+      <div class="meter" aria-hidden="true"><div class="mid"></div><div class="needle" id="tuneNeedle"></div><div class="ticks"><span>−50 flat</span><span>0</span><span>sharp +50</span></div></div>
     </div>
     <p class="notice" id="tuneMsg" hidden></p>
-    <p class="hint">줄 버튼을 누르면 그 음이 계속 울려요(다시 누르면 꺼짐). 기준음과 함께 활을 그으면서 맥놀이(소리가 울렁거리는 것)가 사라질 때까지 맞추세요. A현부터 맞추고 D, G, C 순서로 내려가는 게 일반적이에요.</p>
+    <p class="hint">Tap a string to play its reference tone; tap again to stop. Bow along with it and adjust until the beating (the wobble in the sound) disappears. Tune the A string first, then D, G and C.</p>
   </section>
 
   <section class="panel" id="panel-file">
     <div class="row">
-      <span class="btn file">녹음 파일 올리기<input type="file" id="fileInput" accept="audio/*,video/*"></span>
-      <label class="small">기준음 A4 <select id="a4"><option>440</option><option>441</option><option>442</option><option>443</option></select> Hz</label>
-      <label class="small">정확 판정 <select id="tol"><option value="10">±10센트</option><option value="15" selected>±15센트</option><option value="20">±20센트</option></select></label>
+      <span class="btn file">Upload Recording<input type="file" id="fileInput" accept="audio/*,video/*"></span>
+      <label class="small">A4 = <select id="a4"><option>440</option><option>441</option><option>442</option><option>443</option></select> Hz</label>
+      <label class="small">In tune within <select id="tol"><option value="10">±10 cents</option><option value="15" selected>±15 cents</option><option value="20">±20 cents</option></select></label>
     </div>
-    <p class="hint">휴대폰 음성 메모로 녹음한 파일이면 됩니다. 곡 전체가 아니어도 괜찮아요. 연주한 구간을 자동으로 찾아 맞춰 봅니다. 천천히 연주할수록 더 정확해요.</p>
+    <p class="hint">A Voice Memos recording from your phone works. You don’t need to play the whole piece; the app finds which bars you played. Slower playing gives more accurate results.</p>
     <div class="status" id="fileStatus"></div>
   </section>
 
   <section class="panel" id="panel-live" hidden>
     <div class="row">
-      <button class="btn" id="liveBtn">듣기 시작</button>
-      <label class="small">시작 마디 <input type="number" id="startBar" min="1" max="39" value="1" style="width:64px"></label>
-      <button class="btn ghost" id="liveReset">처음으로</button>
+      <button class="btn" id="liveBtn">Start Listening</button>
+      <label class="small">Start at bar <input type="number" id="startBar" min="1" max="39" value="1" style="width:64px"></label>
+      <button class="btn ghost" id="liveReset">Restart</button>
     </div>
     <div class="tuner">
-      <div class="tbox"><span class="tlabel">지금 내는 음</span><span class="tnote" id="curNote">–</span><span class="tcents" id="curCents">&nbsp;</span></div>
-      <div class="tbox"><span class="tlabel">악보의 다음 음</span><span class="tnote" id="expNote">–</span><span class="tcents" id="expInfo">&nbsp;</span></div>
-      <div class="meter" aria-hidden="true"><div class="mid"></div><div class="needle" id="needle"></div><div class="ticks"><span>−50 낮음</span><span>0</span><span>높음 +50</span></div></div>
+      <div class="tbox"><span class="tlabel">You are playing</span><span class="tnote" id="curNote">–</span><span class="tcents" id="curCents">&nbsp;</span></div>
+      <div class="tbox"><span class="tlabel">Next note in score</span><span class="tnote" id="expNote">–</span><span class="tcents" id="expInfo">&nbsp;</span></div>
+      <div class="meter" aria-hidden="true"><div class="mid"></div><div class="needle" id="needle"></div><div class="ticks"><span>−50 flat</span><span>0</span><span>sharp +50</span></div></div>
     </div>
     <p class="notice" id="liveMsg" hidden></p>
-    <p class="hint">다음 음을 맞게 내면 악보의 음표가 색으로 채워지고 다음 음으로 넘어갑니다. 반음 틀리게 내도 그 자리에 기록돼요.</p>
+    <p class="hint">Play the next note and it’s colored on the staff, then the marker moves on. A note played a half step off is still recorded in its place.</p>
   </section>
 
   <div class="summary scorepart" id="summary"></div>
 
   <section class="panel tendency" id="tendency" hidden>
-    <h2>자주 어긋나는 음</h2>
+    <h2>Notes you tend to miss</h2>
     <div id="tendList"></div>
   </section>
 
   <section class="sec scorepart" style="display:flex;flex-direction:column;gap:10px">
     <div class="row" style="justify-content:space-between">
-      <h2>악보 <span class="badge" id="resultTag">예시 결과</span></h2>
+      <h2>Score <span class="badge" id="resultTag">Sample result</span></h2>
       <div class="legend">
-        <span><i style="background:var(--ok)"></i>정확</span>
-        <span><i style="background:var(--high)"></i>높음</span>
-        <span><i style="background:var(--low)"></i>낮음</span>
-        <span><i style="background:transparent;border:1.5px solid var(--high);border-radius:50%;width:13px;height:13px;vertical-align:-2px"></i>반음 이상 틀림</span>
-        <span><i style="background:transparent;border:1.3px solid var(--miss)"></i>못 들음</span>
+        <span><i style="background:var(--ok)"></i>In tune</span>
+        <span><i style="background:var(--high)"></i>Sharp</span>
+        <span><i style="background:var(--low)"></i>Flat</span>
+        <span><i style="background:transparent;border:1.5px solid var(--high);border-radius:50%;width:13px;height:13px;vertical-align:-2px"></i>Half step or more off</span>
+        <span><i style="background:transparent;border:1.3px solid var(--miss)"></i>Not heard</span>
       </div>
     </div>
-    <p class="hint" id="resultNote">아래는 1~8마디를 가상으로 연주한 예시예요. 녹음 파일을 올리면 내 연주 결과로 바뀝니다. 음표 아래 숫자는 센트(반음 = 100센트)이고, 음표를 누르면 정확한 음을 들려줘요.</p>
+    <p class="hint" id="resultNote">This is a simulated performance of bars 1–8. Upload a recording to see your own result. Numbers under the notes are cents (100 cents = one half step). Tap a note to hear the correct pitch.</p>
     <div class="sheet" id="sheet"></div>
   </section>
 
   <details id="editBox" class="scorepart">
-    <summary>악보 음표 확인·수정</summary>
-    <p class="hint" style="margin-top:8px">사진에서 옮겨 적은 음표입니다. 틀린 곳이 있으면 고친 뒤 적용을 누르세요. 한 줄이 한 마디이고, 옥타브는 첼로 개방현 기준으로 C2 · G2 · D3 · A3입니다. 샵은 #, 플랫은 b로 적어요.</p>
+    <summary>Check or edit the notes</summary>
+    <p class="hint" style="margin-top:8px">These notes were transcribed from your photo. If one is wrong, fix it and press Apply. Each line is one bar. Octaves follow the cello open strings: C2 · G2 · D3 · A3. Write sharps as # and flats as b.</p>
     <textarea id="scoreText" spellcheck="false"></textarea>
-    <div class="row" style="margin-top:8px"><button class="btn" id="applyScore">적용</button><button class="btn ghost" id="resetScore">원래대로</button><span class="status" id="editStatus"></span></div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="applyScore">Apply</button><button class="btn ghost" id="resetScore">Reset to original</button><span class="status" id="editStatus"></span></div>
   </details>
 </div>
 
@@ -428,14 +428,14 @@ function drawNote(g,n,x,y,whole){
   for(let l=28;l<=s;l+=2)svgEl('line',{class:'ledger',x1:x-8.5,y1:yOf(l),x2:x+8.5,y2:yOf(l)},g);
   if(n.acc)svgEl('text',{class:'acc',x:x-15,y:y+5},g).textContent=n.acc>0?'♯':'♭';
   const {cls,txt,r}=noteClass(n);
-  const ng=svgEl('g',{class:cls,tabindex:0,role:'button','aria-label':`${n.bar}마디 ${n.name}${n.oct}${txt?' '+txt+'센트':''}`},g);
+  const ng=svgEl('g',{class:cls,tabindex:0,role:'button','aria-label':`Bar ${n.bar} ${n.name}${n.oct}${txt?' '+txt+' cents':''}`},g);
   svgEl('rect',{class:'hit',x:x-12,y:4,width:24,height:SVG_H-6,rx:5},ng);
   if(n.idx===LIVE_CUR)svgEl('polygon',{class:'cursor',points:`${x-5},${SVG_H-2} ${x+5},${SVG_H-2} ${x},${SVG_H-8}`},ng);
   const head=svgEl('ellipse',{class:'head'+(whole?' whole':''),cx:x,cy:y,rx:whole?6.6:5.4,ry:whole?4.4:3.9,transform:whole?'':`rotate(-22 ${x} ${y})`},ng);
   if(cls.includes('semi'))svgEl('circle',{class:'ring',cx:x,cy:y,r:9},ng);
   if(txt)svgEl('text',{class:'lab',x,y:LAB_Y},ng).textContent=txt;
   const title=svgEl('title',{},ng);
-  title.textContent=r&&r!=='miss'?`${n.bar}마디 ${n.name}${n.oct}: ${Math.round(r.cents)}센트 (연주한 음 ${midiName(r.played)})`:`${n.bar}마디 ${n.name}${n.oct}`;
+  title.textContent=r&&r!=='miss'?`Bar ${n.bar} ${n.name}${n.oct}: ${Math.round(r.cents)} cents (you played ${midiName(r.played)})`:`Bar ${n.bar} ${n.name}${n.oct}`;
   const play=()=>playTone(n.midi);
   ng.addEventListener('click',play);
   ng.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();play();}});
@@ -476,19 +476,19 @@ function renderSummary(){
     if(Math.abs(r.cents)<=65){const k=n.name+n.oct;(byNote[k]=byNote[k]||[]).push(r.cents);}
   });
   const pct=total?Math.round(cnt.ok/(total-cnt.miss||1)*100):0;
-  const range=(()=>{const idx=SCORE.filter(n=>RESULT[n.idx]!==undefined);return idx.length?`${idx[0].bar}~${idx[idx.length-1].bar}마디`:'';})();
-  s.innerHTML=`<div class="stat"><b>${pct}%</b><span>정확한 음 비율 · ${range}</span></div>
-  <div class="stat ok"><b>${cnt.ok}</b><span>정확 (±${t}센트)</span></div>
-  <div class="stat high"><b>${cnt.high}</b><span>약간 높음</span></div>
-  <div class="stat low"><b>${cnt.low}</b><span>약간 낮음</span></div>
-  <div class="stat high"><b>${cnt.semi}</b><span>반음 이상 틀림</span></div>
-  <div class="stat miss"><b>${cnt.miss}</b><span>못 들은 음</span></div>`;
+  const range=(()=>{const idx=SCORE.filter(n=>RESULT[n.idx]!==undefined);return idx.length?`bars ${idx[0].bar}–${idx[idx.length-1].bar}`:'';})();
+  s.innerHTML=`<div class="stat"><b>${pct}%</b><span>In tune · ${range}</span></div>
+  <div class="stat ok"><b>${cnt.ok}</b><span>In tune (±${t} cents)</span></div>
+  <div class="stat high"><b>${cnt.high}</b><span>Slightly sharp</span></div>
+  <div class="stat low"><b>${cnt.low}</b><span>Slightly flat</span></div>
+  <div class="stat high"><b>${cnt.semi}</b><span>Half step or more off</span></div>
+  <div class="stat miss"><b>${cnt.miss}</b><span>Not heard</span></div>`;
   const rows=Object.entries(byNote).filter(([,v])=>v.length>=2)
     .map(([k,v])=>({k,avg:v.reduce((a,b)=>a+b,0)/v.length,n:v.length}))
     .filter(r=>Math.abs(r.avg)>t*0.8).sort((a,b)=>Math.abs(b.avg)-Math.abs(a.avg)).slice(0,5);
   $('tendency').hidden=!rows.length||!$('panel-tune').hidden;
   $('tendList').innerHTML=rows.map(r=>{const v=Math.round(r.avg);
-    return `<div class="trow"><span class="n">${r.k.replace(/(\d)$/,'<sub style="font-size:11px">$1</sub>')}</span><span class="v" style="color:var(--${v>0?'high':'low'})">${v>0?'+':'−'}${Math.abs(v)}센트</span><span class="hint">평균 ${v>0?'높게':'낮게'} · ${r.n}번 나옴</span></div>`}).join('');
+    return `<div class="trow"><span class="n">${r.k.replace(/(\d)$/,'<sub style="font-size:11px">$1</sub>')}</span><span class="v" style="color:var(--${v>0?'high':'low'})">${v>0?'+':'−'}${Math.abs(v)} cents</span><span class="hint">${v>0?'sharp':'flat'} on average · ${r.n} times</span></div>`}).join('');
 }
 function renderAll(){renderSummary();renderScore();}
 
@@ -517,24 +517,24 @@ function startDrone(i){
 
 /* ---------- file analysis ---------- */
 async function analyzeFile(file){
-  const st=$('fileStatus');st.textContent='파일을 여는 중…';
+  const st=$('fileStatus');st.textContent='Opening file…';
   try{
     const buf=await file.arrayBuffer();
     const off=new OfflineAudioContext(1,1,DSR_TARGET);
     const audio=await off.decodeAudioData(buf);
     const len=audio.length,data=new Float32Array(len);
     for(let ch=0;ch<audio.numberOfChannels;ch++){const c=audio.getChannelData(ch);for(let i=0;i<len;i++)data[i]+=c[i]/audio.numberOfChannels;}
-    st.textContent=`음높이 분석 중… (${Math.round(len/audio.sampleRate)}초)`;
-    const {frames,hop}=await trackFrames(data,audio.sampleRate,+$('a4').value,p=>{st.textContent=`음높이 분석 중… ${Math.round(p*100)}%`;});
+    st.textContent=`Analyzing pitch… (${Math.round(len/audio.sampleRate)} s)`;
+    const {frames,hop}=await trackFrames(data,audio.sampleRate,+$('a4').value,p=>{st.textContent=`Analyzing pitch… ${Math.round(p*100)}%`;});
     const segs=segment(frames,hop);
     const res=align(SCORE,segs);
-    if(!res||res.filter(r=>r&&r!=='miss').length<4){st.textContent='악보와 맞는 음을 거의 찾지 못했어요. 첼로 소리가 크게 들어가도록 가까이서 다시 녹음해 보세요.';return;}
+    if(!res||res.filter(r=>r&&r!=='miss').length<4){st.textContent='Couldn’t match the recording to the score. Record again with the phone closer to the cello.';return;}
     RESULT=res;IS_DEMO=false;LIVE_CUR=-1;
     $('resultTag').textContent=file.name.length>24?file.name.slice(0,22)+'…':file.name;
-    $('resultNote').textContent='음표 아래 숫자는 센트(반음 = 100센트)이고, +는 높게, −는 낮게 낸 것입니다. 음표를 누르면 정확한 음을 들려줘요.';
-    st.textContent=`분석 완료 · 들린 음 ${segs.length}개`;
+    $('resultNote').textContent='Numbers under the notes are cents (100 cents = one half step): + is sharp, − is flat. Tap a note to hear the correct pitch.';
+    st.textContent=`Done · ${segs.length} notes heard`;
     renderAll();
-  }catch(e){st.textContent='이 파일은 열 수 없어요. m4a, mp3, wav 파일로 다시 올려 주세요.';}
+  }catch(e){st.textContent='This file can’t be opened. Try an m4a, mp3 or wav file.';}
 }
 $('fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(f)analyzeFile(f);e.target.value='';});
 $('tol').addEventListener('change',renderAll);
@@ -543,7 +543,7 @@ $('a4t').addEventListener('change',()=>{$('a4').value=$('a4t').value;if(drone)st
 
 /* ---------- microphone engine (shared by tuner and live follow) ---------- */
 let mic=null;
-const MIC_BLOCKED='이 화면에서는 마이크를 쓸 수 없어요. 대화에 함께 보내 드린 HTML 파일을 컴퓨터나 휴대폰 브라우저(크롬 권장)로 열면 마이크 기능을 쓸 수 있어요.';
+const MIC_BLOCKED='The microphone isn’t available on this page. Open mhkimphysics.github.io/cello in Safari or Chrome to use it.';
 async function micStart(onFrame){
   const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
   const c=ctx(),src=c.createMediaStreamSource(stream),an=c.createAnalyser();an.fftSize=4096;src.connect(an);
@@ -558,15 +558,15 @@ async function micStart(onFrame){
   loop();
 }
 function micStop(){if(!mic)return;cancelAnimationFrame(mic.raf);mic.stream.getTracks().forEach(t=>t.stop());mic=null;
-  $('liveBtn').textContent='듣기 시작';$('tuneBtn').textContent='마이크로 듣기';}
+  $('liveBtn').textContent='Start Listening';$('tuneBtn').textContent='Listen with Mic';}
 
 /* ---------- open-string tuner ---------- */
-const STRINGS=[{l:'C',o:2,midi:36,ko:'4번 줄'},{l:'G',o:2,midi:43,ko:'3번 줄'},{l:'D',o:3,midi:50,ko:'2번 줄'},{l:'A',o:3,midi:57,ko:'1번 줄'}];
+const STRINGS=[{l:'C',o:2,midi:36,ko:'4th string'},{l:'G',o:2,midi:43,ko:'3rd string'},{l:'D',o:3,midi:50,ko:'2nd string'},{l:'A',o:3,midi:57,ko:'1st string'}];
 let tuneNear=-1,tuneOk=false,tuneHist=[];
 function renderStrings(){
   const a4=+$('a4t').value;
   $('strings').innerHTML=STRINGS.map((s,i)=>`<button class="str${drone&&drone.i===i?' drone':''}${tuneNear===i?(tuneOk?' inTune':' near'):''}" data-i="${i}" aria-pressed="${!!(drone&&drone.i===i)}">
-    <span class="sn">${s.l}<sub>${s.o}</sub></span><span class="sh">${(a4*Math.pow(2,(s.midi-69)/12)).toFixed(1)} Hz</span><span class="sd">${drone&&drone.i===i?'울리는 중':s.ko}</span></button>`).join('');
+    <span class="sn">${s.l}<sub>${s.o}</sub></span><span class="sh">${(a4*Math.pow(2,(s.midi-69)/12)).toFixed(1)} Hz</span><span class="sd">${drone&&drone.i===i?'Playing':s.ko}</span></button>`).join('');
   $('strings').querySelectorAll('.str').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i;drone&&drone.i===i?stopDrone():startDrone(i);}));
 }
 function tuneFrame(f){
@@ -575,42 +575,42 @@ function tuneFrame(f){
   tuneHist.push(m);if(tuneHist.length>8)tuneHist.shift();
   const mm=median(tuneHist);
   let best=0,bd=99;STRINGS.forEach((s,i)=>{const d=Math.abs(adjust(mm-s.midi));if(d<bd){bd=d;best=i;}});
-  if(bd>1.5){$('tuneVerdict').textContent='개방현과 너무 멀어요';return;}
+  if(bd>1.5){$('tuneVerdict').textContent='Too far from an open string';return;}
   const s=STRINGS[best],c=adjust(mm-s.midi)*100,ok=Math.abs(c)<=5;
   if(best!==tuneNear||ok!==tuneOk){tuneNear=best;tuneOk=ok;renderStrings();}
   $('tuneStr').innerHTML=`${s.l}<sub>${s.o}</sub>`;
-  $('tuneHz').textContent=`${f.toFixed(1)} Hz 들림`;
+  $('tuneHz').textContent=`Hearing ${f.toFixed(1)} Hz`;
   $('tuneCents').textContent=`${c>0?'+':c<0?'−':'±'}${Math.abs(Math.round(c))}`;
   $('tuneCents').style.color=`var(--${ok?'ok':c>0?'high':'low'})`;
-  $('tuneVerdict').textContent=ok?'맞았어요':c>0?'높아요 · 줄을 조금 풀어 주세요':'낮아요 · 줄을 조금 감아 주세요';
+  $('tuneVerdict').textContent=ok?'In tune':c>0?'Sharp · loosen slightly':'Flat · tighten slightly';
   $('tuneVerdict').style.color=`var(--${ok?'ok':c>0?'high':'low'})`;
   $('tuneNeedle').style.left=`calc(${50+Math.max(-50,Math.min(50,c))}% - 2px)`;
 }
 $('tuneBtn').addEventListener('click',async()=>{
   if(mic){micStop();return;}
   $('tuneMsg').hidden=true;
-  try{await micStart(tuneFrame);$('tuneBtn').textContent='듣기 멈춤';}
-  catch(e){$('tuneMsg').hidden=false;$('tuneMsg').textContent=MIC_BLOCKED+' 지금은 줄 버튼으로 기준음을 들으며 귀로 맞출 수 있어요.';}
+  try{await micStart(tuneFrame);$('tuneBtn').textContent='Stop Listening';}
+  catch(e){$('tuneMsg').hidden=false;$('tuneMsg').textContent=MIC_BLOCKED+' You can still tune by ear with the string buttons.';}
 });
 
 /* ---------- live follow ---------- */
 let L=null;
 function setLiveCursor(i){LIVE_CUR=Math.max(0,Math.min(SCORE.length-1,i));const n=SCORE[LIVE_CUR];
-  $('expNote').innerHTML=n?`${n.name}<sub>${n.oct}</sub>`:'–';$('expInfo').textContent=n?`${n.bar}마디 · ${n.idx-SCORE.findIndex(x=>x.bar===n.bar)+1}번째 음`:'';renderScore();}
-function liveRecord(i,cents,played){if(!RESULT||IS_DEMO){RESULT=new Array(SCORE.length).fill(undefined);IS_DEMO=false;$('resultTag').textContent='실시간 연주';}
+  $('expNote').innerHTML=n?`${n.name}<sub>${n.oct}</sub>`:'–';$('expInfo').textContent=n?`Bar ${n.bar} · note ${n.idx-SCORE.findIndex(x=>x.bar===n.bar)+1}`:'';renderScore();}
+function liveRecord(i,cents,played){if(!RESULT||IS_DEMO){RESULT=new Array(SCORE.length).fill(undefined);IS_DEMO=false;$('resultTag').textContent='Live';}
   RESULT[i]={cents,played};}
 async function startLive(){
   const msg=$('liveMsg');msg.hidden=true;
   if(LIVE_CUR<0)setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));
   L={hist:[],note:null,peak:0,quiet:0};
-  try{await micStart(liveFrame);$('liveBtn').textContent='듣기 멈춤';}
-  catch(e){msg.hidden=false;msg.textContent=MIC_BLOCKED+' 지금은 녹음 파일 분석을 이용해 주세요.';}
+  try{await micStart(liveFrame);$('liveBtn').textContent='Stop Listening';}
+  catch(e){msg.hidden=false;msg.textContent=MIC_BLOCKED+' Use Analyze Recording instead.';}
 }
 function liveFrame(f,rms){
   const a4=+$('a4').value,midi=f?toMidi(f,a4):null;
   if(midi!==null){const near=Math.round(midi),c=(midi-near)*100;
     $('curNote').innerHTML=`${NAMES[((near%12)+12)%12]}<sub>${Math.floor(near/12)-1}</sub>`;
-    $('curCents').textContent=`${c>0?'+':c<0?'−':'±'}${Math.abs(Math.round(c))}센트`;
+    $('curCents').textContent=`${c>0?'+':c<0?'−':'±'}${Math.abs(Math.round(c))} cents`;
     $('needle').style.left=`calc(${50+Math.max(-50,Math.min(50,c))}% - 2px)`;}
   else{$('curCents').innerHTML='&nbsp;';}
   const exp=SCORE[LIVE_CUR];if(!exp)return;
@@ -631,7 +631,7 @@ function liveFrame(f,rms){
   if(Math.abs(dExp)<=1.6){L.note={i:LIVE_CUR,vals:[dExp]};L.peak=rms;}
 }
 $('liveBtn').addEventListener('click',()=>mic?micStop():startLive());
-$('liveReset').addEventListener('click',()=>{RESULT=null;IS_DEMO=false;$('resultTag').textContent='실시간 연주';setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));renderSummary();});
+$('liveReset').addEventListener('click',()=>{RESULT=null;IS_DEMO=false;$('resultTag').textContent='Live';setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));renderSummary();});
 $('startBar').addEventListener('change',()=>{if($('panel-live').hidden)return;setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));});
 
 /* ---------- tabs ---------- */
@@ -649,9 +649,9 @@ function showTab(which){
 /* ---------- score editor ---------- */
 function loadScore(text){const p=parseScore(text);if(!p.notes.length)return false;SCORE=p.notes;return p;}
 $('applyScore').addEventListener('click',()=>{const p=parseScore($('scoreText').value);
-  if(p.errs.length){$('editStatus').textContent=`${[...new Set(p.errs)].join(', ')}번째 줄을 읽을 수 없어요.`;return;}
+  if(p.errs.length){$('editStatus').textContent=`Can’t read line ${[...new Set(p.errs)].join(', ')}.`;return;}
   SCORE=p.notes;RESULT=null;LIVE_CUR=-1;try{localStorage.setItem('dz9score',$('scoreText').value);}catch(e){}
-  $('editStatus').textContent='적용했어요.';renderAll();});
+  $('editStatus').textContent='Applied.';renderAll();});
 $('resetScore').addEventListener('click',()=>{$('scoreText').value=ORIGINAL;try{localStorage.removeItem('dz9score');}catch(e){}$('applyScore').click();});
 
 /* ---------- demo: synthetic performance of bars 1–8 ---------- */
