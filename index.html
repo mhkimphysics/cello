@@ -71,6 +71,36 @@ select,input[type=number]{font:inherit;font-size:14px;padding:5px 8px;border-rad
 .str.drone{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .str.drone .sh,.str.drone .sd{color:var(--on-accent)}
 .verdict{font-weight:700;font-size:15px;min-height:1.5em}
+/* header tools */
+.headrow{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.awake{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer}
+.awake input{width:16px;height:16px;accent-color:var(--accent)}
+.awake .dot{width:8px;height:8px;border-radius:50%;background:var(--miss)}
+.awake.on .dot{background:var(--ok)}
+/* progress */
+.chartwrap{position:relative;min-width:0}
+.chartwrap svg{display:block;width:100%;height:auto}
+.chartwrap .grid{stroke:var(--line);stroke-width:1}
+.chartwrap .axis{fill:var(--muted);font:500 11px var(--f-mono)}
+.chartwrap .ln{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chartwrap .pt{fill:var(--accent);stroke:var(--surface);stroke-width:2}
+.chartwrap .pthit{fill:transparent;cursor:pointer}
+.chartwrap .vlab{fill:var(--ink);font:700 12px var(--f-mono)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.4;padding:6px 9px;border-radius:7px;white-space:nowrap;transform:translate(-50%,-115%)}
+.tablewrap{overflow-x:auto;min-width:0}
+table.log{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+table.log th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.log td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.log td.num{font-family:var(--f-mono)}
+.del{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:6px;font:12px var(--f-body);padding:3px 8px;cursor:pointer}
+.del.arm{border-color:var(--high);color:var(--high)}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--muted);font-size:14px}
+/* practice */
+.hold{grid-column:1/-1;height:8px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.hold i{display:block;height:100%;width:0;background:var(--ok);transition:width .1s linear}
+.nt.sel .hit{fill:var(--accent-soft)}
+.nt .rate{font:500 10px var(--f-mono);text-anchor:middle;fill:var(--muted)}
+.nt .held{font:700 11px var(--f-mono);text-anchor:middle;fill:var(--ok)}
 /* summary */
 .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -125,13 +155,18 @@ textarea{width:100%;min-height:220px;font:13px/1.5 var(--f-mono);background:var(
   <header>
     <span class="eyebrow">CELLO · INTONATION PRACTICE</span>
     <h1>Dotzauer No. 9 Intonation</h1>
-    <span class="meta">A minor · Allegro moderato · 4/4 · 39 bars · 304 eighth notes</span>
+    <div class="headrow">
+      <span class="meta">A minor · Allegro moderato · 4/4 · 39 bars · 304 eighth notes</span>
+      <label class="awake" id="awakeLbl"><input type="checkbox" id="awake" checked><span class="dot"></span><span id="awakeTxt">Keep screen on</span></label>
+    </div>
   </header>
 
   <div class="tabs" role="tablist">
     <button role="tab" id="tab-tune" aria-selected="false">Tune Open Strings</button>
     <button role="tab" id="tab-file" aria-selected="true">Analyze Recording</button>
     <button role="tab" id="tab-live" aria-selected="false">Live Follow</button>
+    <button role="tab" id="tab-progress" aria-selected="false">Progress</button>
+    <button role="tab" id="tab-practice" aria-selected="false">Trouble Notes</button>
   </div>
 
   <section class="panel" id="panel-tune" hidden>
@@ -172,6 +207,45 @@ textarea{width:100%;min-height:220px;font:13px/1.5 var(--f-mono);background:var(
     </div>
     <p class="notice" id="liveMsg" hidden></p>
     <p class="hint">Play the next note and it’s colored on the staff, then the marker moves on. A note played a half step off is still recorded in its place.</p>
+  </section>
+
+  <section class="panel" id="panel-progress" hidden>
+    <div class="row" style="justify-content:space-between">
+      <label class="small">Piece <select id="pieceSel"><option value="dotzauer9">Dotzauer No. 9</option></select></label>
+      <span class="hint">Every analyzed recording and Live Follow session is saved here.</span>
+    </div>
+    <div class="summary" id="progStats"></div>
+    <div id="progBody">
+      <h2 style="font-size:15px;margin:4px 0 6px">In-tune rate by session</h2>
+      <div class="chartwrap" id="progChart"></div>
+      <div class="tablewrap" style="margin-top:12px"><table class="log" id="progTable"></table></div>
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="exportBtn">Back up records</button>
+      <span class="btn ghost file">Restore backup<input type="file" id="importInput" accept=".json,application/json"></span>
+      <span class="status" id="progStatus"></span>
+    </div>
+    <p class="hint">Records stay in this browser on this device. On iPhone or iPad, add the site to your Home Screen so Safari keeps them, and make a backup now and then.</p>
+  </section>
+
+  <section class="panel" id="panel-practice" hidden>
+    <p class="hint" id="pracIntro">Notes you often play out of tune, collected from your last 10 sessions. The number above each note is how often it was off; the number below is your average offset. Tap a note to hear it and practice it.</p>
+    <div class="sheet" id="pracSheet"></div>
+    <div id="pracTools">
+      <div class="row" style="margin-bottom:12px">
+        <button class="btn" id="pracListen">Listen with Mic</button>
+        <button class="btn ghost" id="pracHear">Hear note</button>
+        <button class="btn ghost" id="pracNext">Next note</button>
+      </div>
+      <div class="tuner">
+        <div class="tbox"><span class="tlabel">Target</span><span class="tnote" id="pracTarget">–</span><span class="tcents" id="pracWhere">&nbsp;</span></div>
+        <div class="tbox"><span class="tlabel">You are playing</span><span class="tnote" id="pracCents" style="font-family:var(--f-mono);font-size:28px">–</span><span class="verdict" id="pracVerdict">&nbsp;</span></div>
+        <div class="meter" aria-hidden="true"><div class="mid"></div><div class="needle" id="pracNeedle"></div><div class="ticks"><span>−50 flat</span><span>0</span><span>sharp +50</span></div></div>
+        <div class="hold" aria-hidden="true"><i id="pracHold"></i></div>
+      </div>
+      <p class="notice" id="pracMsg" hidden></p>
+      <p class="hint" style="margin-top:10px">Hold the note in tune (within the In-tune range) for 1.5 seconds to score it. Then the next trouble note comes up.</p>
+    </div>
   </section>
 
   <div class="summary scorepart" id="summary"></div>
@@ -486,7 +560,7 @@ function renderSummary(){
   const rows=Object.entries(byNote).filter(([,v])=>v.length>=2)
     .map(([k,v])=>({k,avg:v.reduce((a,b)=>a+b,0)/v.length,n:v.length}))
     .filter(r=>Math.abs(r.avg)>t*0.8).sort((a,b)=>Math.abs(b.avg)-Math.abs(a.avg)).slice(0,5);
-  $('tendency').hidden=!rows.length||!$('panel-tune').hidden;
+  $('tendency').hidden=!rows.length||!SCORE_TABS.includes(CUR_TAB);
   $('tendList').innerHTML=rows.map(r=>{const v=Math.round(r.avg);
     return `<div class="trow"><span class="n">${r.k.replace(/(\d)$/,'<sub style="font-size:11px">$1</sub>')}</span><span class="v" style="color:var(--${v>0?'high':'low'})">${v>0?'+':'−'}${Math.abs(v)} cents</span><span class="hint">${v>0?'sharp':'flat'} on average · ${r.n} times</span></div>`}).join('');
 }
@@ -532,7 +606,7 @@ async function analyzeFile(file){
     RESULT=res;IS_DEMO=false;LIVE_CUR=-1;
     $('resultTag').textContent=file.name.length>24?file.name.slice(0,22)+'…':file.name;
     $('resultNote').textContent='Numbers under the notes are cents (100 cents = one half step): + is sharp, − is flat. Tap a note to hear the correct pitch.';
-    st.textContent=`Done · ${segs.length} notes heard`;
+    st.textContent=`Done · ${segs.length} notes heard`+(saveSession('file',file.name)?' · saved to Progress':'');
     renderAll();
   }catch(e){st.textContent='This file can’t be opened. Try an m4a, mp3 or wav file.';}
 }
@@ -558,7 +632,7 @@ async function micStart(onFrame){
   loop();
 }
 function micStop(){if(!mic)return;cancelAnimationFrame(mic.raf);mic.stream.getTracks().forEach(t=>t.stop());mic=null;
-  $('liveBtn').textContent='Start Listening';$('tuneBtn').textContent='Listen with Mic';}
+  $('liveBtn').textContent='Start Listening';$('tuneBtn').textContent='Listen with Mic';$('pracListen').textContent='Listen with Mic';}
 
 /* ---------- open-string tuner ---------- */
 const STRINGS=[{l:'C',o:2,midi:36,ko:'4th string'},{l:'G',o:2,midi:43,ko:'3rd string'},{l:'D',o:3,midi:50,ko:'2nd string'},{l:'A',o:3,midi:57,ko:'1st string'}];
@@ -598,7 +672,7 @@ let L=null;
 function setLiveCursor(i){LIVE_CUR=Math.max(0,Math.min(SCORE.length-1,i));const n=SCORE[LIVE_CUR];
   $('expNote').innerHTML=n?`${n.name}<sub>${n.oct}</sub>`:'–';$('expInfo').textContent=n?`Bar ${n.bar} · note ${n.idx-SCORE.findIndex(x=>x.bar===n.bar)+1}`:'';renderScore();}
 function liveRecord(i,cents,played){if(!RESULT||IS_DEMO){RESULT=new Array(SCORE.length).fill(undefined);IS_DEMO=false;$('resultTag').textContent='Live';}
-  RESULT[i]={cents,played};}
+  RESULT[i]={cents,played};LIVE_DIRTY=true;}
 async function startLive(){
   const msg=$('liveMsg');msg.hidden=true;
   if(LIVE_CUR<0)setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));
@@ -615,7 +689,7 @@ function liveFrame(f,rms){
   else{$('curCents').innerHTML='&nbsp;';}
   const exp=SCORE[LIVE_CUR];if(!exp)return;
   const finish=()=>{if(L.note&&L.note.vals.length>=6){const md=median(L.note.vals);liveRecord(L.note.i,md*100,SCORE[L.note.i].midi+md);
-      if(L.note.i<SCORE.length-1)setLiveCursor(L.note.i+1);else renderScore();renderSummary();}L.note=null;L.peak=0;};
+      if(L.note.i<SCORE.length-1)setLiveCursor(L.note.i+1);else{renderScore();micStop();maybeSaveLive();}renderSummary();}L.note=null;L.peak=0;};
   if(midi===null){L.quiet++;if(L.quiet>=3)finish();L.hist=[];return;}
   L.quiet=0;L.hist.push(midi);if(L.hist.length>6)L.hist.shift();
   if(L.note){
@@ -630,21 +704,217 @@ function liveFrame(f,rms){
   if(Math.abs(dNext)<=0.4&&Math.abs(dExp)>0.6){if(!RESULT||IS_DEMO){RESULT=new Array(SCORE.length).fill(undefined);IS_DEMO=false;}RESULT[LIVE_CUR]='miss';LIVE_CUR++;L.note={i:LIVE_CUR,vals:[dNext]};L.peak=rms;return;}
   if(Math.abs(dExp)<=1.6){L.note={i:LIVE_CUR,vals:[dExp]};L.peak=rms;}
 }
-$('liveBtn').addEventListener('click',()=>mic?micStop():startLive());
-$('liveReset').addEventListener('click',()=>{RESULT=null;IS_DEMO=false;$('resultTag').textContent='Live';setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));renderSummary();});
+$('liveBtn').addEventListener('click',()=>{if(mic){micStop();maybeSaveLive();}else startLive();});
+$('liveReset').addEventListener('click',()=>{maybeSaveLive();RESULT=null;IS_DEMO=false;$('resultTag').textContent='Live';setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));renderSummary();});
 $('startBar').addEventListener('change',()=>{if($('panel-live').hidden)return;setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));});
 
 /* ---------- tabs ---------- */
+const TABS=['tune','file','live','progress','practice'],SCORE_TABS=['file','live'];
+let CUR_TAB='file';
 function showTab(which){
-  micStop();
-  ['tune','file','live'].forEach(k=>{$('tab-'+k).setAttribute('aria-selected',k===which);$('panel-'+k).hidden=k!==which;});
-  document.querySelectorAll('.scorepart').forEach(el=>el.hidden=which==='tune');
+  const wasLive=CUR_TAB==='live';
+  micStop();if(wasLive)maybeSaveLive();
+  CUR_TAB=which;
+  TABS.forEach(k=>{$('tab-'+k).setAttribute('aria-selected',k===which);$('panel-'+k).hidden=k!==which;});
+  document.querySelectorAll('.scorepart').forEach(el=>el.hidden=!SCORE_TABS.includes(which));
+  if(which==='progress')renderProgress();
+  if(which==='practice')renderPractice();
   if(which!=='tune')stopDrone();
   if(which==='live'){if(LIVE_CUR<0)setLiveCursor(SCORE.findIndex(n=>n.bar>=+$('startBar').value));}
   else{LIVE_CUR=-1;}
   renderAll();
 }
-['tune','file','live'].forEach(k=>$('tab-'+k).addEventListener('click',()=>showTab(k)));
+TABS.forEach(k=>$('tab-'+k).addEventListener('click',()=>showTab(k)));
+
+
+/* ---------- keep screen awake ---------- */
+let wakeLock=null;
+function updAwake(){
+  const on=!!wakeLock,sup='wakeLock' in navigator,want=$('awake').checked;
+  $('awakeLbl').classList.toggle('on',on&&want);
+  $('awakeTxt').textContent=!want?'Keep screen on':!sup?'Keep screen on (not supported here)':on?'Screen stays on':'Keep screen on';
+}
+async function requestWake(){
+  if(!$('awake').checked||!('wakeLock' in navigator)||document.visibilityState!=='visible'||wakeLock){updAwake();return;}
+  try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;updAwake();});}catch(e){wakeLock=null;}
+  updAwake();
+}
+function releaseWake(){if(wakeLock){try{wakeLock.release();}catch(e){}wakeLock=null;}updAwake();}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')requestWake();});
+document.addEventListener('pointerdown',requestWake,{passive:true});
+$('awake').addEventListener('change',()=>{try{localStorage.setItem('cello.awake',$('awake').checked?'1':'0');}catch(e){}$('awake').checked?requestWake():releaseWake();});
+try{if(localStorage.getItem('cello.awake')==='0')$('awake').checked=false;}catch(e){}
+
+/* ---------- session records ---------- */
+const PIECE_ID='dotzauer9', PIECE_TITLE='Dotzauer No. 9', STORE='cello.sessions.v1';
+let LIVE_DIRTY=false;
+function loadSessions(){try{const a=JSON.parse(localStorage.getItem(STORE)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function storeSessions(a){try{localStorage.setItem(STORE,JSON.stringify(a));return true;}catch(e){return false;}}
+function buildSession(mode,label){
+  if(!RESULT||IS_DEMO)return null;
+  const t=tol();let c={ok:0,high:0,low:0,semi:0,miss:0},abs=0,absN=0,from=99,to=0;const notes={};
+  SCORE.forEach(n=>{const r=RESULT[n.idx];if(r===undefined)return;
+    from=Math.min(from,n.bar);to=Math.max(to,n.bar);
+    if(r==='miss'){c.miss++;return;}
+    const cl=classify(r.cents,t);if(cl==='ok')c.ok++;else if(cl==='high')c.high++;else if(cl==='low')c.low++;else c.semi++;
+    const k=n.name+n.oct,e=notes[k]||(notes[k]={m:n.midi,n:0,off:0,s:0,k:0});
+    e.n++;if(cl!=='ok')e.off++;
+    if(Math.abs(r.cents)<=65){e.s+=Math.round(r.cents);e.k++;abs+=Math.abs(r.cents);absN++;}
+  });
+  const heard=c.ok+c.high+c.low+c.semi;
+  if(heard<8)return null;
+  return {id:Date.now(),piece:PIECE_ID,ts:new Date().toISOString(),mode,label:label||'',from,to,tol:t,
+    pct:Math.round(c.ok/heard*100),...c,heard,mae:absN?Math.round(abs/absN*10)/10:null,notes};
+}
+function saveSession(mode,label){const s=buildSession(mode,label);if(!s)return false;const a=loadSessions();a.push(s);return storeSessions(a);}
+function maybeSaveLive(){
+  if(!LIVE_DIRTY)return;LIVE_DIRTY=false;
+  const ok=saveSession('live','Live Follow');
+  const m=$('liveMsg');m.hidden=false;m.textContent=ok?'Session saved to Progress.':'Play at least 8 notes to save a session.';
+}
+function pieceSessions(){return loadSessions().filter(s=>s.piece===$('pieceSel').value).sort((a,b)=>a.ts<b.ts?-1:1);}
+function fmtDate(iso,withTime){const d=new Date(iso);const ds=`${d.getMonth()+1}/${d.getDate()}`;return withTime?`${ds} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:ds;}
+
+function renderProgress(){
+  const ss=pieceSessions();
+  const stats=$('progStats');
+  if(!ss.length){
+    stats.innerHTML='';
+    $('progBody').innerHTML=`<div class="empty">No sessions yet. Analyze a recording or finish a Live Follow session, and your results will show up here.</div>`;
+    return;
+  }
+  if(!$('progChart')){$('progBody').innerHTML=`<h2 style="font-size:15px;margin:4px 0 6px">In-tune rate by session</h2><div class="chartwrap" id="progChart"></div><div class="tablewrap" style="margin-top:12px"><table class="log" id="progTable"></table></div>`;}
+  const last=ss[ss.length-1],best=Math.max(...ss.map(s=>s.pct)),first=ss[0];
+  const recent=ss.slice(-5),avg5=Math.round(recent.reduce((a,s)=>a+s.pct,0)/recent.length);
+  const diff=last.pct-first.pct;
+  stats.innerHTML=`<div class="stat"><b>${last.pct}%</b><span>Latest · ${fmtDate(last.ts)}</span></div>
+    <div class="stat ok"><b>${best}%</b><span>Best</span></div>
+    <div class="stat"><b>${avg5}%</b><span>Average of last ${recent.length}</span></div>
+    <div class="stat ${diff>=0?'ok':'high'}"><b>${diff>0?'+':diff<0?'−':''}${Math.abs(diff)}</b><span>Points since first session</span></div>
+    <div class="stat"><b>${ss.length}</b><span>Sessions</span></div>`;
+  drawChart(ss);
+  const rows=[...ss].reverse().map(s=>`<tr><td>${fmtDate(s.ts,true)}</td><td>${s.mode==='live'?'Live':'Recording'}</td><td class="num">${s.from}–${s.to}</td><td class="num"><b>${s.pct}%</b></td><td class="num">${s.mae==null?'–':'±'+s.mae}</td><td class="num">${s.high}/${s.low}/${s.semi}</td><td><button class="del" data-id="${s.id}">Delete</button></td></tr>`).join('');
+  $('progTable').innerHTML=`<thead><tr><th>Date</th><th>Type</th><th>Bars</th><th>In tune</th><th>Avg off (cents)</th><th>Sharp/Flat/Half step</th><th></th></tr></thead><tbody>${rows}</tbody>`;
+  $('progTable').querySelectorAll('.del').forEach(b=>b.addEventListener('click',()=>{
+    if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Confirm';setTimeout(()=>{if(b.isConnected){b.classList.remove('arm');b.textContent='Delete';}},3000);return;}
+    storeSessions(loadSessions().filter(s=>String(s.id)!==b.dataset.id));renderProgress();}));
+}
+function drawChart(ss){
+  const box=$('progChart');box.innerHTML='';
+  const W=Math.max(300,box.clientWidth||600),H=220,L=40,R=40,T=16,B=30;
+  const n=ss.length,xw=W-L-R,yh=H-T-B;
+  const x=i=>n===1?L+xw/2:L+i*xw/(n-1),y=v=>T+yh*(1-v/100);
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'img','aria-label':`In-tune rate over ${n} sessions, latest ${ss[n-1].pct}%`},box);
+  [0,25,50,75,100].forEach(v=>{svgEl('line',{class:'grid',x1:L,x2:W-R,y1:y(v),y2:y(v)},svg);svgEl('text',{class:'axis',x:L-8,y:y(v)+4,'text-anchor':'end'},svg).textContent=v+'%';});
+  const ticks=n<=6?ss.map((_,i)=>i):[0,Math.round((n-1)/3),Math.round(2*(n-1)/3),n-1];
+  [...new Set(ticks)].forEach(i=>{svgEl('text',{class:'axis',x:x(i),y:H-8,'text-anchor':'middle'},svg).textContent=fmtDate(ss[i].ts);});
+  if(n>1)svgEl('polyline',{class:'ln',points:ss.map((s,i)=>`${x(i)},${y(s.pct)}`).join(' ')},svg);
+  const tip=document.createElement('div');tip.className='tip';tip.hidden=true;box.appendChild(tip);
+  ss.forEach((s,i)=>{
+    svgEl('circle',{class:'pt',cx:x(i),cy:y(s.pct),r:4.5},svg);
+    const h=svgEl('circle',{class:'pthit',cx:x(i),cy:y(s.pct),r:14},svg);
+    const show=()=>{const sc=box.clientWidth/W;tip.hidden=false;tip.style.left=x(i)*sc+'px';tip.style.top=y(s.pct)*sc+'px';
+      tip.innerHTML=`<b>${s.pct}% in tune</b><br>${fmtDate(s.ts,true)} · bars ${s.from}–${s.to}<br>avg off ${s.mae==null?'–':'±'+s.mae+' cents'}`;};
+    h.addEventListener('pointerenter',show);h.addEventListener('click',show);h.addEventListener('pointerleave',()=>tip.hidden=true);
+  });
+  svgEl('text',{class:'vlab',x:x(n-1)+8,y:y(ss[n-1].pct)+4},svg).textContent=ss[n-1].pct+'%';
+}
+$('pieceSel').addEventListener('change',renderProgress);
+$('exportBtn').addEventListener('click',()=>{
+  const data=JSON.stringify({app:'cello-intonation',version:1,exported:new Date().toISOString(),sessions:loadSessions()},null,1);
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=`cello-records-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();
+    $('progStatus').textContent='Backup file created.';}catch(e){$('progStatus').textContent='Backups can’t be saved on this page. Use the website instead.';}
+});
+$('importInput').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());const inc=Array.isArray(d)?d:d.sessions;if(!Array.isArray(inc))throw 0;
+    const cur=loadSessions(),ids=new Set(cur.map(s=>String(s.id)));let added=0;
+    inc.forEach(s=>{if(s&&s.id&&s.piece&&typeof s.pct==='number'&&!ids.has(String(s.id))){cur.push(s);added++;}});
+    storeSessions(cur);$('progStatus').textContent=`Restored ${added} session${added===1?'':'s'}.`;renderProgress();
+  }catch(err){$('progStatus').textContent='That file isn’t a backup from this app.';}
+});
+
+/* ---------- trouble-note practice ---------- */
+let TROUBLE=[],PSEL=0,pracState=null;
+function computeTrouble(){
+  const ss=loadSessions().filter(s=>s.piece===PIECE_ID).sort((a,b)=>a.ts<b.ts?-1:1).slice(-10);
+  const agg={};
+  ss.forEach(s=>Object.entries(s.notes||{}).forEach(([k,e])=>{const a=agg[k]||(agg[k]={k,m:e.m,n:0,off:0,s:0,c:0});a.n+=e.n;a.off+=e.off;a.s+=e.s;a.c+=e.k;}));
+  return {count:ss.length,list:Object.values(agg).filter(a=>a.n>=3&&a.off/a.n>=0.25)
+    .map(a=>({...a,rate:a.off/a.n,avg:a.c?a.s/a.c:0})).sort((a,b)=>b.rate-a.rate||Math.abs(b.avg)-Math.abs(a.avg)).slice(0,8)};
+}
+function noteFromKey(k,m){const q=k.match(/^([A-G])(♯|♭)?(\d)$/);return {letter:q[1],acc:q[2]==='♯'?1:q[2]==='♭'?-1:0,oct:+q[3],name:q[1]+(q[2]||''),midi:m};}
+function barsFor(k){return [...new Set(SCORE.filter(n=>n.name+n.oct===k).map(n=>n.bar))];}
+function renderPractice(){
+  const {count,list}=computeTrouble();TROUBLE=list;
+  const sheet=$('pracSheet');sheet.innerHTML='';
+  $('pracTools').hidden=!list.length;
+  if(!list.length){
+    sheet.innerHTML=`<div class="empty" style="margin:6px 0">${count?'No trouble notes right now. Every note was in tune at least 75% of the time in your recent sessions.':'No sessions yet. Analyze a recording or finish a Live Follow session, and the notes you often miss will collect here.'}</div>`;
+    return;
+  }
+  if(PSEL>=list.length)PSEL=0;
+  const SP=58,W=CLEF_W+16+list.length*SP;
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${SVG_H}`,width:W,height:SVG_H},sheet);const g=svgEl('g',{},svg);
+  for(let i=0;i<5;i++)svgEl('line',{class:'sline',x1:2,y1:TOPL+i*GAP,x2:W-2,y2:TOPL+i*GAP},g);
+  svgEl('line',{class:'bar',x1:2,y1:TOPL,x2:2,y2:BOTL},g);
+  svgEl('line',{class:'bar',x1:W-2,y1:TOPL,x2:W-2,y2:BOTL},g);
+  drawClef(g);
+  list.forEach((t,i)=>{
+    const n=noteFromKey(t.k,t.m),x=CLEF_W+16+SP/2+i*SP,s=stepOf(n),y=yOf(s);
+    for(let l=16;l>=s;l-=2)svgEl('line',{class:'ledger',x1:x-9,y1:yOf(l),x2:x+9,y2:yOf(l)},g);
+    for(let l=28;l<=s;l+=2)svgEl('line',{class:'ledger',x1:x-9,y1:yOf(l),x2:x+9,y2:yOf(l)},g);
+    if(n.acc)svgEl('text',{class:'acc',x:x-17,y:y+5},g).textContent=n.acc>0?'♯':'♭';
+    const v=Math.round(t.avg),cl=Math.abs(v)<=tol()?'':v>0?' high':' low';
+    const ng=svgEl('g',{class:'nt'+cl+(i===PSEL?' sel':''),tabindex:0,role:'button','aria-label':`${n.name}${n.oct}, off ${Math.round(t.rate*100)}% of the time, average ${v} cents`},g);
+    svgEl('rect',{class:'hit',x:x-SP/2+3,y:4,width:SP-6,height:SVG_H-6,rx:6},ng);
+    svgEl('text',{class:'rate',x,y:14},ng).textContent=Math.round(t.rate*100)+'% off';
+    svgEl('ellipse',{class:'head whole',cx:x,cy:y,rx:6.6,ry:4.4,style:`stroke:var(--${cl?cl.trim():'ink'})`},ng);
+    svgEl('text',{class:'lab',x,y:LAB_Y},ng).textContent=(v>0?'+':v<0?'−':'±')+Math.abs(v);
+    if(pracState&&pracState.held[t.k])svgEl('text',{class:'held',x,y:LAB_Y-14},ng).textContent='✓'+pracState.held[t.k];
+    const pick=()=>{PSEL=i;setTarget();renderPractice();playTone(t.m);};
+    ng.addEventListener('click',pick);ng.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});
+  });
+  setTarget();
+}
+function setTarget(){
+  const t=TROUBLE[PSEL];if(!t)return;const n=noteFromKey(t.k,t.m);
+  $('pracTarget').innerHTML=`${n.name}<sub>${n.oct}</sub>`;
+  const b=barsFor(t.k);$('pracWhere').textContent=`In bars ${b.slice(0,6).join(', ')}${b.length>6?'…':''}`;
+  if(pracState){pracState.hold=0;pracState.hist=[];}
+  $('pracHold').style.width='0';
+}
+function pracFrame(f){
+  const t=TROUBLE[PSEL];if(!t||!pracState)return;
+  const now=performance.now(),dt=Math.min(100,now-(pracState.last||now));pracState.last=now;
+  if(pracState.cool>now)return;
+  if(!f){pracState.hist=[];pracState.hold=Math.max(0,pracState.hold-dt*2);$('pracHold').style.width=(pracState.hold/15)+'%';return;}
+  const c=adjust(toMidi(f,+$('a4').value)-t.m)*100;
+  pracState.hist.push(c);if(pracState.hist.length>5)pracState.hist.shift();
+  const mc=median(pracState.hist);
+  if(Math.abs(mc)>150){$('pracCents').textContent='–';$('pracVerdict').textContent='Different note';$('pracVerdict').style.color='var(--muted)';pracState.hold=0;$('pracHold').style.width='0';return;}
+  const ok=Math.abs(mc)<=tol();
+  $('pracCents').textContent=`${mc>0?'+':mc<0?'−':'±'}${Math.abs(Math.round(mc))}`;
+  $('pracCents').style.color=`var(--${ok?'ok':mc>0?'high':'low'})`;
+  $('pracVerdict').textContent=ok?'In tune · hold it':mc>0?'Sharp · lower slightly':'Flat · raise slightly';
+  $('pracVerdict').style.color=`var(--${ok?'ok':mc>0?'high':'low'})`;
+  $('pracNeedle').style.left=`calc(${50+Math.max(-50,Math.min(50,mc))}% - 2px)`;
+  pracState.hold=ok?pracState.hold+dt:Math.max(0,pracState.hold-dt);
+  $('pracHold').style.width=Math.min(100,pracState.hold/15)+'%';
+  if(pracState.hold>=1500){
+    pracState.held[t.k]=(pracState.held[t.k]||0)+1;pracState.cool=now+1200;
+    $('pracVerdict').textContent='Got it!';
+    setTimeout(()=>{PSEL=(PSEL+1)%TROUBLE.length;renderPractice();},900);
+  }
+}
+$('pracListen').addEventListener('click',async()=>{
+  if(mic){micStop();return;}
+  $('pracMsg').hidden=true;pracState=pracState||{held:{}};pracState.hold=0;pracState.hist=[];pracState.cool=0;
+  try{await micStart(pracFrame);$('pracListen').textContent='Stop Listening';}
+  catch(e){$('pracMsg').hidden=false;$('pracMsg').textContent=MIC_BLOCKED+' You can still tap Hear note and practice by ear.';}
+});
+$('pracHear').addEventListener('click',()=>{const t=TROUBLE[PSEL];if(t)playTone(t.m);});
+$('pracNext').addEventListener('click',()=>{if(!TROUBLE.length)return;PSEL=(PSEL+1)%TROUBLE.length;renderPractice();});
 
 /* ---------- score editor ---------- */
 function loadScore(text){const p=parseScore(text);if(!p.notes.length)return false;SCORE=p.notes;return p;}
@@ -678,6 +948,7 @@ let saved=null;try{saved=localStorage.getItem('dz9score');}catch(e){}
 $('scoreText').value=saved||ORIGINAL;
 if(!loadScore(saved||ORIGINAL))loadScore(ORIGINAL);
 renderStrings();
+updAwake();
 renderAll();
 runDemo();
 </script>
