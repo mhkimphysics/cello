@@ -820,8 +820,11 @@ function drawChart(ss){
   svgEl('text',{class:'vlab',x:x(n-1)+8,y:y(ss[n-1].pct)+4},svg).textContent=ss[n-1].pct+'%';
 }
 $('pieceSel').addEventListener('change',renderProgress);
-$('exportBtn').addEventListener('click',()=>{
+$('exportBtn').addEventListener('click',async()=>{
   const data=JSON.stringify({app:'cello-intonation',version:1,exported:new Date().toISOString(),sessions:loadSessions()},null,1);
+  const fname=`cello-records-${new Date().toISOString().slice(0,10)}.json`;
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){dl=null;}
+  if(dl){try{await dl.save({filename:fname,data:new Blob([data],{type:'application/json'})});$('progStatus').textContent='Backup file saved.';}catch(e){$('progStatus').textContent='Backup was not saved.';}return;}
   try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=`cello-records-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();
     $('progStatus').textContent='Backup file created.';}catch(e){$('progStatus').textContent='Backups can’t be saved on this page. Use the website instead.';}
 });
